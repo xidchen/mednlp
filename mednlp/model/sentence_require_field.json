@@ -1,0 +1,91 @@
+{
+    "register": {
+		">": {
+			"symptom": 1, "disease": 1, "std_department": 1,
+            "hospital_department": 1, "hospital": 1, "body_part": 1,
+			"treatment": 1, "medicine": 1, "doctor": 1
+		}
+    },
+    "haoyuanRefresh": {
+		">": {
+			"symptom": 1, "disease": 1, "std_department": 1,
+            "hospital_department": 1, "hospital": 1, "body_part": 1,
+			"treatment": 1, "medicine": 1, "doctor": 1
+		}
+    },
+    "recentHaoyuanTime": {
+        "wanted_types": [
+            "doctor"
+        ],
+		">": {
+			"symptom": 1, "disease": 1, "std_department": 1,
+            "hospital_department": 1, "hospital": 1, "body_part": 1,
+			"treatment": 1, "medicine": 1, "doctor": 1
+		}
+    },
+    "doctor": {
+        "wanted_types": [
+            "disease"
+        ],
+        ">": {
+            "hospital": 1,
+            "department": 1,
+            "hospital_department": 1,
+            "disease": 1,
+            "body_part": 1,
+            "nation": 1,
+            "province": 1,
+            "city": 1
+        }
+    },
+    "departmentSubset": {
+        "department": 1
+    },
+    "departmentAmong": {
+        "+>": {
+            "department,hospital_department": 2
+        }
+    },
+    "department": {
+    },
+    "departmentConfirm": {
+        "OR": {
+            "department": 1,
+            "hospital_department": 1
+        }
+    },
+    "hospitalQuality": {
+        "wanted_types": [
+            "disease"
+        ],
+        "hospital": 1
+    },
+    "doctorQuality": {
+        "wanted_types": [
+            "disease",
+            "doctor"
+        ],
+        "doctor": 1
+    },
+    "hospitalDepartment": {
+        "hospital": 1,
+        "OR": {
+            "department": 1,
+            "hospital_department": 1
+        }
+    },
+    "hospital": {
+        "wanted_types": [
+            "disease"
+        ],
+        ">": {
+            "department": 1,
+            "hospital_department": 1,
+            "disease": 1,
+            "body_part": 1,
+            "nation": 1,
+            "province": 1,
+            "city": 1
+        }
+    }
+}

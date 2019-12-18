@@ -1,0 +1,12 @@
+血压升高@|time|前@|reason|@出现|symptom|，@为|symptom_property|，@|sbp|，@|dbp|，@伴随|accompany_symptom|。@应用药物：|medicine_detail|，@症状|medicine_effect|
+血糖升高@|time|前@|reason|@出现|symptom|，@|property_added|，@#in#测量时间不详$$$为#not_in#测量时间不详|symptom_property|，@伴随|accompany_symptom|。@应用药物：|medicine_detail|，@症状|medicine_effect|
+白带异常@|time|前@|reason|@出现|symptom|，@为|symptom_property|，@|property_added|，@伴有|accompany_symptom|。@应用药物：|medicine_detail|，@症状|medicine_effect|
+体重下降#体重减轻#体重减少#体重减低@|time|内@|reason|@出现|symptom|，@体重下降了#not_in#否|quantity$$$#in#否|，#not_in#否$$$#in#否@伴有|accompany_symptom|。@应用药物：|medicine_detail|，@症状|medicine_effect|
+体重上升#体重增高@|time|内@|reason|@出现|symptom|，@体重升高了#not_in#否|quantity$$$#in#否|，#not_in#否$$$#in#否@伴有|accompany_symptom|。@应用药物：|medicine_detail|，@症状|medicine_effect|
+便秘@|time|前@|reason|@出现|symptom|，@|property_added|，@伴有|accompany_symptom|。@|frequency|，@|frequency_added|。@应用药物：|medicine_detail|，@症状|medicine_effect|
+恶心@|time|前@|reason|@出现|symptom|，伴有呕吐，#exist_key#symptom_property$$$，无呕吐，#not_exist_key#symptom_property@为|symptom_property|，@|property_added|，@伴随|accompany_symptom|。@应用药物：|medicine_detail|，@症状|medicine_effect|
+general@|time|前@|reason|出现@|degree|@|symptom|，@部位是|body_part|，@为|symptom_property|，@|property_added|，@呈|frequency|，@|frequency_added|，@|quantity|，@|description|，@|first_body_part|，@伴随|accompany_symptom|@，|accompany_symptom_property|@。应用药物：|medicine_detail|，@症状|medicine_effect|。@末次月经时间：|menstruation_last_time|，@月经周期：|menstruation_interval_time|
+
+
+
+

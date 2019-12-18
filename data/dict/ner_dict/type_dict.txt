@@ -1,0 +1,12 @@
+normal	0
+area	1
+bodypart	2
+disease	3
+doctor	4
+examination	5
+hospital	6
+department	7
+medicine	8
+physical	9
+symptom	10
+treatment	11

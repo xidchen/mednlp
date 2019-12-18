@@ -1,0 +1,12 @@
+{
+    "register": {
+        "area": 1,
+        "hospital": 1,
+        "doctor": 1
+    },
+    "haoyuanRefresh": {
+        "area": 1,
+        "hospital": 1,
+        "doctor": 1
+    }
+}

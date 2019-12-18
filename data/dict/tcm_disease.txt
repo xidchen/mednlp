@@ -1,0 +1,10 @@
+眩晕=d85ca1ca-c28a-4407-ba96-6ae272e1fa84
+咳嗽=faedb8af-cb04-4d38-924d-b0304ba5edf7
+胸痹=d7d08170-f9d5-4f50-baf1-bb39fd9d8530
+胃脘痛=6308a3bc-3aea-4e08-a875-7ab8f7a89375
+崩漏=9d986056-df44-47d1-871c-254bb0aba96a
+消渴=ea4d212c-f60e-4eb5-bd75-7973a3ffb0fc
+哮喘=7e6bef8a-5860-4bfd-baa4-34502e55a671
+水肿=602f48be-32aa-4416-a2da-5c6f43067deb
+闭经=e36d0e6f-d425-4ff7-8a87-d01c011296cf
+心悸=47126cbd-2bce-4eea-843c-7e17e48c4b6d
