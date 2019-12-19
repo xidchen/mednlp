@@ -4,21 +4,18 @@
 """
 vector.py -- the service of vectorization
 
-Author: caoxg <caoxg@guahao.com>
-Create on 2017-11-22 星期三.
+Author: caoxg
+Create on 2017-11-22
 """
 
-import global_conf
+import codecs
 import jieba
 import re
-import sys
-import mednlp.text.dept_vector as dept_vector
+import global_conf
 import mednlp.text.pinyin as pinyin
 from mednlp.dao.data_loader import Key2Value
 from mednlp.text.mmseg import MMSeg
 from mednlp.utils import utils
-from mednlp.utils.utils import unicode_python_2_3
-import codecs
 
 
 def get_sex_to_vector(sex):
@@ -28,13 +25,10 @@ def get_sex_to_vector(sex):
     :param sex: 性别男或者女
     :return: 返回男女对应的标签
     """
-    if not sys.version > '3':
-        sex = sex if isinstance(sex, unicode) else unicode(sex)
-    else:
-        sex = sex if isinstance(sex, str) else str(sex)
-    if sex in [u'女', u'女性']:
+    sex = sex if isinstance(sex, str) else str(sex)
+    if sex in ['女', '女性']:
         return '1'
-    elif sex in [u'男', u'男性']:
+    elif sex in ['男', '男性']:
         return '2'
     sex = str(sex) if str(sex) in ['1', '2'] else '0'
     return sex
@@ -46,20 +40,12 @@ def get_age_to_vector_for_lstm(age):
     :param age: 用数字表示的年龄
     :return: 返回所对应的年龄段
     """
-    if not sys.version > '3':
-        unicode = unicode
-    else:
-        unicode = str
     if isinstance(age, (int, float)):
         age = float(age)
-    elif not sys.version > '3':
-        if isinstance(age, long):
-            age = float(age)
     else:
-        if isinstance(age, (str, unicode)):
-            age = unicode_python_2_3(age)
+        if isinstance(age, str):
             month_label = False
-            if re.search(u'月', age):
+            if re.search('月', age):
                 month_label = True
             age = re.search("\d+(\.\d+)?", age)
             if age and month_label:
@@ -91,8 +77,6 @@ def get_age_to_vector_for_lstm(age):
 class Char2vector(object):
     def __init__(self, dept_classify_dict_path=global_conf.dept_classify_char_dict_path):
         self.dept_classify_dict_path = dept_classify_dict_path
-        # self.dept_dict, self.dept_id, self.dept_name_to_id = \
-        #     dept_vector.load_dept_dict()
         self.medical_word = self.load_medical_dic()
         pinyin.load_pinyin_dic()
 
@@ -110,9 +94,10 @@ class Char2vector(object):
     def get_vector(self, content):
         return self.get_char_vector(content)
 
-    def get_char_vector(self, content, isIgnore=True):
+    def get_char_vector(self, content, is_ignore=True):
         """
         把content按照char词典转化为词向量
+        :param is_ignore: 
         :param content: unicode编码的中文文本
         :return: 输出词向量
         """
@@ -122,7 +107,7 @@ class Char2vector(object):
                 word = str(word)
                 if self.medical_word.get(word):
                     words.append(str(self.medical_word[word]))
-                elif not isIgnore:
+                elif not is_ignore:
                     words.append('0')
         return words
 
@@ -135,8 +120,6 @@ class Pinyin2vector(object):
     def __init__(self,
                  dept_classify_dict_path=global_conf.dept_classify_pinyin_dict_path):
         self.dept_classify_dict_path = dept_classify_dict_path
-        # self.dept_dict, self.dept_id, self.dept_name_to_id = \
-        #     dept_vector.load_dept_dict()
         self.medical_word = self.load_medical_dic()
 
     def load_medical_dic(self):
@@ -154,9 +137,10 @@ class Pinyin2vector(object):
     def get_vector(self, content):
         return self.get_pinyin_vector(content)
 
-    def get_pinyin_vector(self, content, isIgnore=True):
+    def get_pinyin_vector(self, content, is_ignore=True):
         """
         把content按照char词典转化为词向量
+        :param is_ignore: 
         :param content: unicode编码的中文文本
         :return: 输出词向量
         """
@@ -167,7 +151,7 @@ class Pinyin2vector(object):
                 word = str(word)
                 if self.medical_word.get(word):
                     words.append(str(self.medical_word[word]))
-                elif not isIgnore:
+                elif not is_ignore:
                     words.append('0')
 
         return words
@@ -242,8 +226,11 @@ class Label2Vector(object):
 
 class Intent2Vector(BaseVector):
 
-    def load_dict(self, file_name=global_conf.dept_classify_char_dict_path):
+    def __init__(self, dict_path):
+        super().__init__(dict_path)
         self.word2idx = {}
+
+    def load_dict(self, file_name=global_conf.dept_classify_char_dict_path):
         with open(file_name, 'r') as f:
             for line_temp in f:
                 line_temp = line_temp.strip()
@@ -316,17 +303,18 @@ class Dept2Vector(BaseVector):
         return content in self.name2index
 
 
-
-
 class Char2vectorbody(BaseVector):
     """
     主要是为了实现把实体比方说身体部位在训练中标记出来，进行转化为词向量
     比方说身体部位   $LBP$头$RBP$
     """
 
+    def __init__(self, dict_path):
+        super().__init__(dict_path)
+        self.medical_word = {}
+
     def load_dict(self, path):
         """装载词典"""
-        self.medical_word = {}
         for line in open(path, 'r'):
             line = line.strip()
             line_items = line.split('\t')
@@ -347,114 +335,12 @@ class Char2vectorbody(BaseVector):
         dict_type = ['body_part']
         mmseg = MMSeg(dict_type, uuid_all=False, is_uuid=True, update_dict=False, is_all_word=False)
         words = []
-        content = utils.get_char_body_part(mmseg, content, dict_type=dict_type)
+        content = utils.get_char_body_part(mmseg, content)
         for word in content:
             word = str(word)
             if self.medical_word.get(word):
                 words.append(str(self.medical_word[word]))
         return words
-
-
-class Char2vectorsexage(BaseVector):
-    """
-    主要是为了实现把实体比方说身体部位在训练中标记出来，进行转化为词向量
-    比方说身体部位   $LBP$头$RBP$
-    """
-    if not sys.version > '3':
-        unicode = unicode
-    else:
-        unicode = str
-
-    def load_dict(self, path):
-        """装载词典"""
-        self.medical_word = {}
-        for line in open(path, 'r'):
-            line = line.strip()
-            line_items = line.split('\t')
-            if len(line_items) != 2:
-                continue
-            self.medical_word[str(line_items[0])] = int(line_items[1])
-        return self.medical_word
-
-    def get_vector(self, content):
-        return self.get_char_vector(content)
-
-    def get_char_vector(self, content):
-        """
-        把content按照char词典转化为词向量
-        :param content: unicode编码的中文文本
-        :return: 输出词向量
-        """
-        words = []
-        for word in content:
-            word = str(word)
-            if self.medical_word.get(word):
-                words.append(str(self.medical_word[word]))
-        return words
-
-    def get_sex_to_vector(slef, sex):
-        """
-        把性别转化为词向量，
-        其中男性-> 2,女性-> 1,未知->0
-        :param sex:性别男或者女
-        :return:返回男女对应的标签
-        """
-        if isinstance(sex, unicode):
-            sex = sex
-        else:
-            sex = unicode_python_2_3(sex)
-        if sex == u'男' or sex == u'男性':
-            return '2'
-        elif sex == u'女' or sex == u'女性':
-            return '1'
-        else:
-            return '0'
-
-    def get_age_to_vector(self, age):
-        """
-        把年龄拆分成年龄段
-        :param age: 用数字表示的年龄
-        :return: 返回所对应的年龄段
-        """
-        if isinstance(age, int):
-            age = age
-        elif isinstance(age, float):
-            age = age
-        else:
-            if isinstance(age, str):
-                age = unicode_python_2_3(age)
-            if isinstance(age, unicode):
-                month_label = False
-                if re.search(u"月", age):
-                    month_label = True
-                age = re.search("\d+(\.\d+)?", age)
-                if age and month_label:
-                    age = float(age.group()) / 12
-                elif age:
-                    age = float(age.group())
-                else:
-                    age = 0
-            else:
-
-                age = 0
-        if 0 < age <= 1:
-            return '3'
-        elif 1 < age < 10:
-            return '4'
-        elif 10 <= age < 14:
-            return '5'
-        elif 14 <= age < 18:
-            return '6'
-        elif 18 <= age <= 30:
-            return '7'
-        elif 30 < age <= 45:
-            return '8'
-        elif 45 < age <= 60:
-            return '9'
-        elif age > 60:
-            return '10'
-        else:
-            return '11'
 
 
 class Word2vector(BaseVector):
@@ -462,10 +348,13 @@ class Word2vector(BaseVector):
     把语句按照pinyin词典转化为词向量
     """
 
+    def __init__(self, dict_path):
+        super().__init__(dict_path)
+        self.id2word = {}
+        self.medical_word = {}
+
     def load_dict(self, path):
         """装载词典"""
-        self.medical_word = {}
-        self.id2word = {}
         for line in open(path, 'r'):
             line = line.strip()
             line_items = line.split('\t')
@@ -482,6 +371,7 @@ class Word2vector(BaseVector):
     def get_word_vector(self, content, seg_type=''):
         """
         把content按照char词典转化为词向量
+        :param seg_type: 
         :param content: unicode编码的中文文本
         :return: 输出词向量
 
@@ -498,7 +388,7 @@ class Word2vector(BaseVector):
         return words
 
 
-class StandardAsk2Vector():
+class StandardAsk2Vector:
 
     def __init__(self, path):
         self.id_name, self.name_code = self.load_dict(path)
@@ -512,7 +402,6 @@ class StandardAsk2Vector():
         """
         id_name = {}
         name_code = {}
-        # file_name = os.path.join('/home/caoxg/work/mednlp/data/traindata/intelligent_service', 'ask_clear.txt')
         f = codecs.open(path, 'r', encoding='utf-8')
         for line in f:
             lines = line.strip().split('==')
@@ -542,7 +431,7 @@ class StandardAsk2Vector():
 
 
 def tet():
-    line = u'我身体不舒服头有点疼'
+    line = '我身体不舒服头有点疼'
     char2vector = Char2vector(
         dept_classify_dict_path=global_conf.dept_classify_char_dict_path)
     vector3 = char2vector.get_char_vector(line)
@@ -557,9 +446,8 @@ def tet():
     check2vector = Check2Vector(dept_classify_dict_path=global_conf.dept_classify_check_consult_path)
     print(check2vector.id_check)
     print(check2vector.check_id)
-    body2vector = Char2vectorbody('/home/caoxg/work/mednlp/data/dict/dept_classify_char_vocab_body.dic')
-    t = body2vector.get_vector(u'我脑袋有问题,我屁股有点疼')
-    for word in t:
+    body2vector = Char2vectorbody(global_conf.char_vocab_dict_path)
+    for word in body2vector.get_vector('我脑袋有问题,我屁股有点疼'):
         print(word)
 
 

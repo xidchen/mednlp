@@ -1,5 +1,5 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#-*-coding: utf-8-*-
 
 """
 utils.py
@@ -9,24 +9,24 @@ import re
 import json
 import time
 import codecs
-import sys   # todo
-from mednlp.text.mmseg import MMSeg
-import copy
-import global_conf
-import jieba
 import xlrd
 import configparser
+import global_conf
+from mednlp.text.mmseg import MMSeg
 
 
-id_dept = {'生殖与遗传': ['男科', '妇科'], '手外科': ['骨科'], '口腔颌面外科': ['口腔科'], '肿瘤外科': ['肿瘤科'],
-                         '关节外科': ['骨科']}
+id_dept = {'生殖与遗传': ['男科', '妇科'],
+           '手外科': ['骨科'],
+           '口腔颌面外科': ['口腔科'],
+           '肿瘤外科': ['肿瘤科'],
+           '关节外科': ['骨科']}
 insert_dict = {
     '身体部位左侧': '$LBP$',
     '身体部位右侧': '$RBP$'
 }
 
 
-def unicode2str(data, encode="UTF-8"):
+def unicode2str(data):
     # list,set 格式
     if isinstance(data, list):
         for index, temp in enumerate(data):
@@ -121,7 +121,7 @@ def load_json(path):
     return data
 
 
-def match_patterns(s, patterns):
+def match_patterns(string, patterns):
     """
     判断string是否能匹配模式集中的至少一条
     :param string: 需要寻找模式的string
@@ -129,7 +129,7 @@ def match_patterns(s, patterns):
     :return: True or False
     """
     for pattern in patterns:
-        mat_obj = re.search(pattern, s)
+        mat_obj = re.search(pattern, string)
         if mat_obj:
             return True
     return False
@@ -268,11 +268,10 @@ def get_split_result(lines):
     return result
 
 
-def get_char_body_part(mmseg, content, dict_type=['body_part']):
+def get_char_body_part(mmseg, content):
     """
     :param mmseg: 分隔器 mmseg
     :param content: 原理的内容
-    :param dict_type: 需要按照某种实体进行分隔
     :return: 返回根据实体添加左右分隔符，所有单词构成的一个列表
     """
     entities = mmseg.cut(content, maximum=500)
@@ -305,14 +304,15 @@ def distinct_list_dict(dialogs, **kwargs):
     result.sort(key=lambda d: d.get(order_key))
     return result
 
-def pasttime_by_seconds(seconds=0, fmt='%Y-%m-%d %H:%M:%S'):
+
+def past_time_by_seconds(seconds=0, fmt='%Y-%m-%d %H:%M:%S'):
     timestamp = int(time.time())
     if seconds != 0:
         timestamp -= seconds
         return time.strftime(fmt, time.localtime(timestamp))
 
 
-def string_wraper(elements, wrap="'"):
+def string_wrapper(elements, wrap="'"):
     if isinstance(elements, (list, set, tuple)):
         return ['%s%s%s' % (wrap, e, wrap) for e in elements]
     elif isinstance(elements, str):
@@ -336,7 +336,7 @@ def create_id_where_clause(value, field, **kwargs):
         wrap = "'"
         if 'wrap' in kwargs:
             wrap = kwargs['wrap']
-        value = string_wraper(value, wrap)
+        value = string_wrapper(value, wrap)
         value_str = value
         if isinstance(value, (list, tuple, set)) and isinstance(field, str):
             value_str = ','.join(value)
@@ -351,11 +351,12 @@ def create_id_where_clause(value, field, **kwargs):
             for sql_field, id_field in field.items():
                 value_id = value.get(id_field)
                 if value_id:
-                    value_str = ','.join(string_wraper(value_id, wrap))
+                    value_str = ','.join(string_wrapper(value_id, wrap))
                     clause = clause_format % (operator, sql_field, value_str)
                     clause_list.append(clause)
             where_clause = ''.join(clause_list)
     return where_clause
+
 
 def format_time(mysql_time, solr_format='%Y-%m-%dT%H:%M:%SZ'):
     """
@@ -374,6 +375,7 @@ def format_time(mysql_time, solr_format='%Y-%m-%dT%H:%M:%SZ'):
     else:
         return None
 
+
 def load_xlsx_data(r_path, sheet_index=0, **kwargs):
     # 读取xlsx数据
     data = xlrd.open_workbook(r_path)
@@ -385,6 +387,7 @@ def load_xlsx_data(r_path, sheet_index=0, **kwargs):
         row_data = table.row_values(row_num)
         result.append(row_data)
     return result
+
 
 def _trans(s):
     digit = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9}
@@ -405,25 +408,17 @@ def _trans(s):
 
 if __name__ == '__main__':
     a = u'我爱$brp$中国$end$，我在$brp$杭州$end$'
-    split_char = '\$brp\$|\$end\$'
-    sen_split = split_sen_add_char(a, split_char)
-    for s in sen_split:
-        print(s)
+    split_char_0 = '\$brp\$|\$end\$'
+    sen_split = split_sen_add_char(a, split_char_0)
+    for sen_0 in sen_split:
+        print(sen_0)
     dict_type = ['body_part']
-    mmseg = MMSeg(dict_type, uuid_all=False, is_uuid=True, update_dict=False, is_all_word=False)
-    content1 = '我脑袋有问题,我屁股有点疼'
-    content2 = '我喜欢中国，我喜欢杭州'
-    content3 = '3月22日进行手术切除，肝右叶原发性细胞癌，肉瘤样型，部分区伴胆管上皮分化，慢性乙肝，癌胚细胞均正常，目前未发现转移' \
+    mmseg_instance = MMSeg(dict_type, uuid_all=False, is_uuid=True, update_dict=False, is_all_word=False)
+    content_0 = '我脑袋有问题,我屁股有点疼'
+    content_1 = '我喜欢中国，我喜欢杭州'
+    content_2 = '3月22日进行手术切除，肝右叶原发性细胞癌，肉瘤样型，部分区伴胆管上皮分化，慢性乙肝，癌胚细胞均正常，目前未发现转移' \
                '，东方肝胆建议术后一个月进行预防介入。目前术后腹胀，一天比一天腹胀减少，人乏力，胃口还行，请问何时可以中药治疗'
-    result1 = get_char_body_part(mmseg, content1, dict_type=dict_type)
-    print(content1)
-    for word in result1:
-        print(word)
-    result2 = get_char_body_part(mmseg, content2, dict_type=dict_type)
-    print(content2)
-    for word in result2:
-        print(word)
-    print(content3)
-    result3 = get_char_body_part(mmseg, content3, dict_type=dict_type)
-    for word in result3:
-        print(word)
+    result_0 = get_char_body_part(mmseg_instance, content_0)
+    print(content_0)
+    for word_0 in result_0:
+        print(word_0)

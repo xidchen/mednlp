@@ -8,21 +8,9 @@ Author: chenxk <chenxk@guahao.com>
 Create on 2019-11-02 Friday.
 """
 
-import math
-import global_conf
-import ailib.utils.text as text
-from ailib.client.ai_service_client import AIServiceClient
-from ailib.client.solr import Solr
-from ailib.utils.log import GLLog
 from ailib.storage.db import DBWrapper
 from mednlp.base.nlp import BaseNLP
-from mednlp.kg.db_conf import inspection
-from mednlp.kg.db_conf import entity_type_dict
-from mednlp.kg.db_conf import db_conf
-import mednlp.utils.utils as utils
-from mednlp.utils.file_operation import get_disease_name
-import traceback
-import json
+from mednlp.utils.utils import past_time_by_seconds
 
 
 class RuleDBDao(BaseNLP):
@@ -160,7 +148,7 @@ class RuleDBDao(BaseNLP):
         FROM ai_union.rule r 
         WHERE r.gmt_modified >= '%s' AND r.rule_id IS NULL
         """
-        modify_time = utils.pasttime_by_seconds(sec)
+        modify_time = past_time_by_seconds(sec)
         rows = self.db.get_rows(sql % modify_time)
         return [row['id'] for row in rows if row['id']]
 
