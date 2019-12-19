@@ -4,7 +4,7 @@
 """
 symptom_parser.py -- the parser of symptom
 
-Author: maogy <maogy@guahao.com>
+Author: maogy
 Create on 2017-12-27 Wednesday.
 """
 
@@ -12,7 +12,7 @@ import sys
 from optparse import OptionParser
 from mednlp.text.mmseg import MMSeg
 from mednlp.text.synonym import Synonym
-from mednlp.utils.utils import unicode_python_2_3
+
 
 class SymptomParser(object):
     """
@@ -32,7 +32,6 @@ class SymptomParser(object):
         content->需要解析的内容.
         返回值->解析得到的症状,结构:{body_part:{symptom_name: symptom_id}}
         """
-        content = unicode_python_2_3(content)
         bps = self.bp_extractor.cut(content)
         if not bps:
             return None
@@ -98,10 +97,10 @@ class SymptomExtend(object):
         参数:
         symptom->症状名称.
         """
-        sub_symptom = self.extractor.cut(unicode_python_2_3(symptom))
+        sub_symptom = self.extractor.cut(symptom)
         if sub_symptom:
-            extend_symptom = self.extender.synonym_extend(symptom,
-                                                          sub_symptom.keys())
+            extend_symptom = self.extender.synonym_extend(
+                symptom, sub_symptom.keys())
             if extend_symptom:
                 extend_symptom = {}
                 for e_symptom in extend_symptom:
@@ -125,14 +124,13 @@ class SymptomCheck(object):
         """
         self.extractor = kwargs.pop('extractor', MMSeg(dict_type=['symptom']))
 
-    def check(self, word):
+    def check(self, test_symptom):
         """
         检查是否症状.
         参数:
-        word->待检查的词.
+        test_symptom->待检查的词.
         返回值->是症状返回症状ID,否则返回False
         """
-        test_symptom = unicode_python_2_3(word)
         symptoms = self.extractor.cut(test_symptom)
         if not symptoms:
             return False
@@ -143,7 +141,7 @@ class SymptomCheck(object):
 
 
 if __name__ == "__main__":
-    content = '    3年前无诱因反复头晕，多次测血脂高于正常，要求休息。'
+    content0 = '    3年前无诱因反复头晕，多次测血脂高于正常，要求休息。'
     command = """
     python %s -s string
     """ %sys.argv[0]
@@ -151,6 +149,6 @@ if __name__ == "__main__":
     parser.add_option("-s", "--string", dest="string", help="the cut string")
     (options, args) = parser.parse_args()
     if options.string is not None:
-        content = options.string
+        content0 = options.string
     parser = SymptomParser()
-    print(parser.parse(content))
+    print(parser.parse(content0))

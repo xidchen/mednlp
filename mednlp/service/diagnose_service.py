@@ -5,7 +5,7 @@
 diagnose_service.py -- the service of diagnosis
 
 Author: chenxd
-Create on 2017-07-10 Monday.
+Create on 2017-07-10 Monday
 """
 
 import copy
@@ -26,6 +26,7 @@ from mednlp.kg.clinical_guide_disease import ClinicalGuideDisease
 from mednlp.kg.inspection import Inspection
 from mednlp.service.base_request_handler import BaseRequestHandler
 from mednlp.text.neg_filter import filter_negative
+from mednlp.text.neg_filter import filter_physical_examination_negative
 from mednlp.text.value_status_transformer import ValueStatusTransformer
 from mednlp.utils.file_operation import get_disease_advice
 from mednlp.utils.file_operation import get_disease_advice_code
@@ -172,8 +173,8 @@ class DiagnoseService(BaseRequestHandler):
         physical_examination = physical_examination if physical_examination != 'None' else ''
         chief_complaint = filter_negative(chief_complaint)
         past_medical_history = filter_negative(past_medical_history)
-        # inspection = filter_negative(inspection)
-        # physical_examination = filter_negative(physical_examination)
+        inspection = filter_negative(inspection)
+        physical_examination = filter_physical_examination_negative(physical_examination)
         medical_record = {'source': source,
                           'chief_complaint': chief_complaint,
                           'medical_history': medical_history,

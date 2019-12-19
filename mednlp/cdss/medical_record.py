@@ -28,6 +28,7 @@ class MedicalRecordParser(object):
         self.chief_complaint_parser = ChiefComplaintParser(debug=self.debug)
         self.past_medical_history_parser = PastMedicalHistory()
         self.age_seg = [28, 365*15, 365*30, 365*45, 365*60, 365*500]
+        self.units = {'天': 1, '日': 1, '周': 7, '月': 30, '年': 365}
 
     def parse(self, medical_record):
         """
@@ -78,8 +79,7 @@ class MedicalRecordParser(object):
         content->需要解析的内容.
         返回值->天数,未早到则返回-1
         """
-        units = {'天': 1, '日': 1, '周': 7, '月': 30, '年': 365}
-        for unit, base in units.items():
+        for unit, base in self.units.items():
             m = re.match('\D*(\d+)(%s)' % unit, str(content))
             if not m:
                 continue
