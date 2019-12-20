@@ -128,8 +128,9 @@ class ChiefComplaintParser(object):
             self.extractor = MMSeg(dict_type=['symptom_wy'])
             self.bp_extractor = MMSeg(dict_type=['body_part'])
             self.d_extractor = MMSeg(dict_type=['disease'])
-            self.ins_extractor = MMSeg(dict_type=['examination'])
-            self.pe_extractor = MMSeg(dict_type=['physical'])
+            self.ins_extractor = MMSeg(dict_type=['inspection_item'])
+            self.pe_extractor = MMSeg(dict_type=[
+                'physical', 'examination_item', 'examination_result'])
             self.symptom_parser = SymptomParser()
         self.multi_seg = MMSeg(dict_type=['synonym'], is_all_word=True)
         self.seg = MedSeg(global_conf)
