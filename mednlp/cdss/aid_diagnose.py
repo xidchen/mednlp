@@ -75,11 +75,9 @@ class AidDiagnose(object):
         self.past_medical_history_discount = 1
         self.symptom_discount = 0.999
         self.past_medical_history = ''
-        self.plat_sc = AIServiceClient(global_conf.cfg_path, 'SEARCH_PLATFORM_SOLR')
         config = configparser.ConfigParser()
         config.optionxform = str
         config.read(global_conf.cfg_path)
-        self.primaryKey = config.items('SEARCH_PLATFORM_SOLR')[10][1]
 
     def diagnose(self, medical_record, **kwargs):
         """
@@ -317,55 +315,6 @@ class AidDiagnose(object):
                     if symptom in self.symptom_name:
                         disease_pop[disease] *= 1 - self.symptom_discount
         return disease_pop
-
-    def critical_disease_diagnose(self):
-        symptom_list = []
-        critical_disease = []
-        for symptom_id in self.mr_parsed['symptom_all']:
-            if self.symptom_wy_name.get(symptom_id):
-                symptom_list.append(self.symptom_wy_name.get(symptom_id))
-        if symptom_list:
-            # critical_disease = self.kg.search_critical_disease(symptom_list)
-            critical_disease = self.critical_disease_search(symptom_list)
-        return critical_disease
-
-    def critical_disease_search(self, symptom_ids):
-        params = {
-            'cat': 'ai_critical_disease_search',
-            'primaryKey': self.primaryKey,
-            'filter': ['is_deleted:0', 'is_critical_disease:是',
-                       'symptom_name:({})'.format(" ".join(symptom_ids))],
-            'fl': 'disease_id,disease_name,relation_score',
-            # 'sort': {'relation_score': 'desc'},
-            'query': '*:*',
-            'rows': '100'
-        }
-        data_list = []
-        try:
-            solr_result = self.plat_sc.query(
-                json.dumps(params), 'search/1.0', method='post', timeout=0.3)
-            if solr_result.get('code') != 200:
-                print('call search cloud solr response http code: {}'
-                      .format(solr_result.get('code')))
-            else:
-                data_list = solr_result.get('data', [])
-        except Exception as e:
-            print('call search cloud solr error', e)
-            traceback.format_exc()
-            return []
-
-        diseases = {}
-        for data in data_list:
-            disease_name = data.get('disease_name')
-            disease_id = data.get('disease_id')
-            disease_score = data.get('relation_score')
-            if disease_name and disease_id and disease_score and disease_score > 0:
-                if disease_name not in diseases:
-                    diseases[disease_name] = [disease_id, 0]
-                diseases[disease_name][1] += (disease_score + 0.2)
-        disease_list = [[k, v[0], v[1]] for k, v in diseases.items()]
-        disease_list.sort(key=lambda x: -x[2])
-        return [{'entity_id': d[1], 'entity_name': d[0]} for d in disease_list][:10]
 
     def diagnose_all(self, medical_record):
         """
