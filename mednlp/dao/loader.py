@@ -84,26 +84,15 @@ def load_synonym_data(db, type_str):
 
 
 def get_disease_sex_filter():
-    label_type = ''
-    for k, v in conf_disease.get('label', {}).items():
-        if v == 'disease_id':
-            label_type = k
     male_id = ''
-    female_id = ''
     for k, v in conf_disease.get('attribute', {}).items():
         if v == 'male_rate':
             male_id = k
-        if v == 'female_rate':
-            female_id = k
 
     sql = """
-        SELECT el.label_value, sa.attribute_type, sa.attribute_value
-        FROM `ai_union`.`standard_attribute` sa
-        JOIN `ai_union`.`entity_label` el
-        JOIN `ai_union`.`entity` en
-        WHERE sa.is_delete = 0 AND el.label_type = '{}' AND attribute_type IN ('{}', '{}')
-            AND sa.standard_uuid = en.standard_uuid AND en.entity_uuid = el.entity_uuid
-    """.format(label_type, male_id, female_id)
+        SELECT label_value, attribute_type, attribute_value
+        FROM `ai_union`.`disease_sex_filter`
+    """
     db = DBWrapper(global_conf.cfg_path, 'mysql', 'KnowledgeGraphSQLDB')
     rows = db.get_rows(sql)
     dictionary = {}
@@ -119,10 +108,6 @@ def get_disease_sex_filter():
 
 
 def get_disease_age_filter():
-    label_type = ''
-    for k, v in conf_disease.get('label', {}).items():
-        if v == 'disease_id':
-            label_type = k
     age_types = {}
     for k, v in conf_disease.get('attribute', {}).items():
         for i in range(6):
@@ -130,13 +115,9 @@ def get_disease_age_filter():
                 age_types[k] = str(i + 1)
 
     sql = """
-        SELECT el.label_value, sa.attribute_type, sa.attribute_value
-        FROM `ai_union`.`standard_attribute` sa
-        JOIN `ai_union`.`entity_label` el
-        JOIN `ai_union`.`entity` en
-        WHERE sa.is_delete = 0 AND el.label_type = '{}' AND attribute_type IN ({})
-            AND sa.standard_uuid = en.standard_uuid AND en.entity_uuid = el.entity_uuid
-    """.format(label_type, ', '.join(["'{}'".format(at) for at in age_types.keys()]))
+        SELECT label_value, attribute_type, attribute_value
+        FROM `ai_union`.`disease_age_filter`
+    """
     db = DBWrapper(global_conf.cfg_path, 'mysql', 'KnowledgeGraphSQLDB')
     rows = db.get_rows(sql)
     dictionary = {}
