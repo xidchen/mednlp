@@ -46,7 +46,6 @@ class DiagnoseService(BaseRequestHandler):
     disease_advice = get_disease_advice()
     disease_advice_code = get_disease_advice_code()
     disease_department = get_disease_dept()
-    kg_docs = get_kg_docs()
     suggest_dict = {
         'suggest_past_history_disease': [
             '高血压', '糖尿病', '冠心病', '脑血管病', '肺结核', '慢性肝病',
@@ -269,14 +268,19 @@ class DiagnoseService(BaseRequestHandler):
         disease_pop = disease_pop[start: start + rows]
         disease_set = set()
         disease_dict, docs = {}, []
+        kg_docs = get_kg_docs()
         if disease_pop_org:
             for disease in disease_pop:
                 disease_id = disease['disease_id']
                 disease_set.add(disease_id)
-                for doc in self.kg_docs:
+                for doc in kg_docs:
                     if doc['entity_id'] == disease_id:
                         disease_dict[disease_id] = doc
                         docs.append(doc)
+        else:
+            for doc in kg_docs:
+                if doc['entity_id'] in self.default_disease_list:
+                    docs.append(doc)
         # for disease in differential_diagnosis_disease:
         #     disease_set.add(disease['disease_id'])
         #     disease_dict[disease['disease_id']] = None
