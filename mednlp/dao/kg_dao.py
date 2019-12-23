@@ -80,7 +80,7 @@ class KGDBDao(BaseNLP):
             ON e.standard_uuid=t.standard_uuid
         WHERE t.gmt_modified >= '%s'
         """
-        modify_time = utils.pasttime_by_seconds(sec)
+        modify_time = utils.past_time_by_seconds(sec)
         rows = self.db.get_rows(sql % (modify_time, modify_time))
         return [row['id'] for row in rows if row['id']]
 

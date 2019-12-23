@@ -20,9 +20,8 @@ def get_disease_id():
     return dictionary
 
 def get_disease_id_add():
-    dictionary = {}
-    with codecs.open(global_conf.disease_id_name_add_path) as f:
-        dictionary = {row[1]: row[0] for row in csv.reader(f)}
+    f = codecs.open(global_conf.disease_id_name_add_path)
+    dictionary = {row[1]: row[0] for row in csv.reader(f)}
     return dictionary
 
 def get_disease_name():

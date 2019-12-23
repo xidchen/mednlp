@@ -62,9 +62,9 @@ class DeptClassifyCharPinyin(BaseModel):
         """预测科室
         :returns: 预测类别和概率
         """
-        char_vector = [self.char_to_vector.get_char_vector(query, isIgnore=False)]
+        char_vector = [self.char_to_vector.get_char_vector(query, is_ignore=False)]
         padding_char_vector = pad_sequences(char_vector, maxlen=100)
-        pinyin_vector = [self.pinyin_to_vector.get_pinyin_vector(query, isIgnore=False)]
+        pinyin_vector = [self.pinyin_to_vector.get_pinyin_vector(query, is_ignore=False)]
         padding_pinyin_vector = pad_sequences(pinyin_vector, maxlen=100)
 
         # predict_result = self.model.predict([padding_char_vector, padding_pinyin_vector])

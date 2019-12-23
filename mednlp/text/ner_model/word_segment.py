@@ -191,7 +191,7 @@ class WordSegmentation(BaseModel):
         :param phrases: 输入的短句列表
         :return: 文本的标签向量列表
         """
-        phrases_vec = np.array([np.array(self.char2vector.get_char_vector(line, isIgnore=False)) for line in phrases])
+        phrases_vec = np.array([np.array(self.char2vector.get_char_vector(line, is_ignore=False)) for line in phrases])
         text_vec = pad_sequences(phrases_vec, maxlen=self.segment_max_len, padding='post', truncating='post', value=0)
         segment_prob = self.segmentation_model.predict(text_vec)
         label_vec = [list(map(lambda prob: np.argmax(prob), p))for p in segment_prob]

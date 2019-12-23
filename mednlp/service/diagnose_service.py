@@ -101,8 +101,10 @@ class DiagnoseService(BaseRequestHandler):
             'source': '', 'chief_complaint': '', 'medical_history': '',
             'past_medical_history': '', 'general_info': '',
             'physical_examination': '', 'department': '', 'sex': '-1',
-            'age': '0', 'body_temperature': '', 'systolic_blood_pressure': '',
-            'diastolic_blood_pressure': '', 'fl': 'entity_id,entity_name',
+            'age': '0', 'body_temperature': '',
+            'systolic_blood_pressure': '', 'diastolic_blood_pressure': '',
+            'fl': 'entity_id,entity_name,'
+                  'symptom_detail,physical_examination,inspection',
             'word_print': '', 'collected_medical_record': '',
             'disease_set': 0, 'start': '0', 'rows': '10', 'mode': '0'
         }
@@ -190,7 +192,7 @@ class DiagnoseService(BaseRequestHandler):
 
         cc_times.append(time.time())
         disease_pop, match_symptom, api_code = ad.diagnose(medical_record)
-        critical_disease = ad.critical_disease_diagnose()
+        # critical_disease = ad.critical_disease_diagnose()
         # disease_pop, match_symptom, api_code, critical_disease = ad.diagnose_all(medical_record)
         cc_times.append(time.time())
 
@@ -200,15 +202,15 @@ class DiagnoseService(BaseRequestHandler):
             print('diagnose range Error!', e)
             print(traceback.format_exc())
 
-        differential_diagnosis_disease = []
-        if collected_medical_record:
-            try:
-                optimize_type = 2 if source == '0' else 1
-                disease_pop, differential_diagnosis_disease = rule_diagnose.optimize_diagnose(
-                    json.loads(collected_medical_record), disease_pop, optimize_type)
-            except Exception as e:
-                print('diagnose rule optimization error', e)
-                print(traceback.format_exc())
+        # differential_diagnosis_disease = []
+        # if collected_medical_record:
+        #     try:
+        #         optimize_type = 2 if source == '0' else 1
+        #         disease_pop, differential_diagnosis_disease = rule_diagnose.optimize_diagnose(
+        #             json.loads(collected_medical_record), disease_pop, optimize_type)
+        #     except Exception as e:
+        #         print('diagnose rule optimization error', e)
+        #         print(traceback.format_exc())
 
         cc_times.append(time.time())
         if disease_pop and disease_pop[0].get('score', 0) < threshold:
@@ -256,12 +258,12 @@ class DiagnoseService(BaseRequestHandler):
         for disease in disease_pop:
             disease_set.add(disease['disease_id'])
             disease_dict[disease['disease_id']] = None
-        for disease in differential_diagnosis_disease:
-            disease_set.add(disease['disease_id'])
-            disease_dict[disease['disease_id']] = None
-        for disease in critical_disease:
-            disease_set.add(disease['entity_id'])
-            disease_dict[disease['entity_id']] = disease['entity_name']
+        # for disease in differential_diagnosis_disease:
+        #     disease_set.add(disease['disease_id'])
+        #     disease_dict[disease['disease_id']] = None
+        # for disease in critical_disease:
+        #     disease_set.add(disease['entity_id'])
+        #     disease_dict[disease['entity_id']] = disease['entity_name']
         fl = fl.replace('physical_examination', 'physical_examination_detail')
         fl = fl.replace('inspection', 'inspection_json')
         fl_extra = ['physical_examination_detail', 'inspection_json',
@@ -311,49 +313,49 @@ class DiagnoseService(BaseRequestHandler):
         # 过滤未找到相关疾病名称的疾病
         disease_pop = [disease for disease in disease_pop if 'disease_name' in disease]
 
-        delete_list = []
-        for disease in critical_disease:
-            self.update_disease(disease, disease_dict, fl, delete_list,
-                                self.disease_advice, self.disease_advice_code,
-                                self.disease_department, disease_set_code)
-        for disease in delete_list:
-            critical_disease.remove(disease)
+        # delete_list = []
+        # for disease in critical_disease:
+        #     self.update_disease(disease, disease_dict, fl, delete_list,
+        #                         self.disease_advice, self.disease_advice_code,
+        #                         self.disease_department, disease_set_code)
+        # for disease in delete_list:
+        #     critical_disease.remove(disease)
         # 未查寻到危重症相关信息，过滤该危重症
-        critical_disease = [cd for cd in critical_disease if cd.get('disease_name')]
+        # critical_disease = [cd for cd in critical_disease if cd.get('disease_name')]
 
-        delete_list = []
-        for disease in differential_diagnosis_disease:
-            self.update_disease(disease, disease_dict, fl, delete_list,
-                                self.disease_advice, self.disease_advice_code,
-                                self.disease_department, disease_set_code)
-        differential_diagnosis_disease = rule_diagnose.sort_differential_diagnosis(
-            differential_diagnosis_disease)
+        # delete_list = []
+        # for disease in differential_diagnosis_disease:
+        #     self.update_disease(disease, disease_dict, fl, delete_list,
+        #                         self.disease_advice, self.disease_advice_code,
+        #                         self.disease_department, disease_set_code)
+        # differential_diagnosis_disease = rule_diagnose.sort_differential_diagnosis(
+        #     differential_diagnosis_disease)
 
-        trans_disease_name_dict = {}
-        if disease_set_code:
-            disease_names = [d.get('disease_name', '') for d in disease_pop
-                             + critical_disease + differential_diagnosis_disease]
-            trans_disease_name_dict = kg.get_disease_set(disease_names, disease_set_code)
-            differential_diagnosis_disease = self._update_disease_set_name(
-                differential_diagnosis_disease, trans_disease_name_dict, fl)
-        extend_data.update({'differential_diagnosis_merge': differential_diagnosis_disease})
+        # trans_disease_name_dict = {}
+        # if disease_set_code:
+        #     disease_names = [d.get('disease_name', '') for d in disease_pop
+        #                      + critical_disease + differential_diagnosis_disease]
+        #     trans_disease_name_dict = kg.get_disease_set(disease_names, disease_set_code)
+        #     differential_diagnosis_disease = self._update_disease_set_name(
+        #         differential_diagnosis_disease, trans_disease_name_dict, fl)
+        # extend_data.update({'differential_diagnosis_merge': differential_diagnosis_disease})
 
-        critical_d_list = []
-        for cd_dict in critical_disease:
-            critical_d_list.append(cd_dict.get('disease_name', ''))
+        # critical_d_list = []
+        # for cd_dict in critical_disease:
+        #     critical_d_list.append(cd_dict.get('disease_name', ''))
 
-        critical_critical_d_str = ','.join(critical_d_list)
-        critical_clinical_data = self._disease_highlight(
-            medical_record, critical_critical_d_str, word_print)
-        new_critical_disease = self._disease_clinical_guide(
-            critical_disease, critical_clinical_data, fl)
+        # critical_critical_d_str = ','.join(critical_d_list)
+        # critical_clinical_data = self._disease_highlight(
+        #     medical_record, critical_critical_d_str, word_print)
+        # new_critical_disease = self._disease_clinical_guide(
+        #     critical_disease, critical_clinical_data, fl)
 
-        if disease_set_code:
-            new_critical_disease = self._update_disease_set_name(
-                new_critical_disease, trans_disease_name_dict, fl)
-        extend_data.update({'match_symptom': match_symptom,
-                            'critical_disease': new_critical_disease})
-        extend_data.update(self.suggest_dict)
+        # if disease_set_code:
+        #     new_critical_disease = self._update_disease_set_name(
+        #         new_critical_disease, trans_disease_name_dict, fl)
+        # extend_data.update({'match_symptom': match_symptom,
+        #                     'critical_disease': new_critical_disease})
+        # extend_data.update(self.suggest_dict)
 
         for result_field, fields in self.suggest_filter_field.items():
             for field in fields:
@@ -361,7 +363,7 @@ class DiagnoseService(BaseRequestHandler):
                 extend_data[result_field] = self._exist_entity_filter(
                     field_value, extend_data.get(result_field, []))
         result.update({'totalCount': total_count,
-                       'extend_data': extend_data,
+                       # 'extend_data': extend_data,
                        'q_time': int((time.time() - start_time) * 1000)})
         ## 添加fl开关
         disease_list = [disease.get('disease_name', '') for disease in disease_pop]
@@ -373,9 +375,9 @@ class DiagnoseService(BaseRequestHandler):
         new_disease_pop = self._disease_clinical_guide(
             disease_pop, clinical_highlight_data, fl)
 
-        if disease_set_code:
-            new_disease_pop = self._update_disease_set_name(
-                new_disease_pop, trans_disease_name_dict, fl)
+        # if disease_set_code:
+        #     new_disease_pop = self._update_disease_set_name(
+        #         new_disease_pop, trans_disease_name_dict, fl)
         result.update({'data': new_disease_pop})
 
         cc_times.append(time.time())
