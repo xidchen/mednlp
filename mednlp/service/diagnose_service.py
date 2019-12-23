@@ -277,9 +277,6 @@ class DiagnoseService(BaseRequestHandler):
                     if doc['entity_id'] == disease_id:
                         disease_dict[disease_id] = doc
                         docs.append(doc)
-        else:
-            docs = [doc for doc in self.kg_docs
-                    if doc['entity_id'] in self.default_disease_list]
         # for disease in differential_diagnosis_disease:
         #     disease_set.add(disease['disease_id'])
         #     disease_dict[disease['disease_id']] = None
