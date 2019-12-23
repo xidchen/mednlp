@@ -115,12 +115,14 @@ def get_disease_physical_exam_filter():
         dictionary[row[0]] = row[1].split('|')
     return dictionary
 
+
 def get_disease_past_medical_history_filter():
     f = codecs.open(global_conf.disease_past_medical_history_filter_path)
     dictionary = {}
     for row in csv.reader(f):
         dictionary[row[0]] = row[1].split('|')
     return dictionary
+
 
 def get_disease_symptom_filter():
     f = codecs.open(global_conf.disease_symptom_filter_path)
@@ -136,6 +138,14 @@ def get_symptom_name():
     for row in f:
         row = row.strip().split('\t')
         dictionary[row[1]] = row[0]
+    return dictionary
+
+
+def get_kg_docs():
+    f = codecs.open(global_conf.kg_docs_path)
+    dictionary = {}
+    for row in f:
+        dictionary = eval(row.strip())
     return dictionary
 
 

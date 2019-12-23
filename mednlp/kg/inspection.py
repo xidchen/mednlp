@@ -38,7 +38,6 @@ class Inspection(object):
             elif min_str and max_str:
                 value_str = '%s~%s' % (min_str, max_str)
             detail['entity_name'] += value_str
-        if detail.get('parent_name'):
-            detail['entity_name'] = detail['parent_name'] + detail['entity_name']
+        # if detail.get('parent_name'):
+        #     detail['entity_name'] = detail['parent_name'] + detail['entity_name']
         return detail
-    

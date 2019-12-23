@@ -8,7 +8,7 @@ Author: chenxd
 Create on 2017-07-10 Monday
 """
 
-import copy
+# import copy
 import json
 import time
 import tornado.web
@@ -20,7 +20,7 @@ from ailib.client.ai_service_client import AIServiceClient
 from mednlp.cdss.aid_diagnose import AidDiagnose, RuleDiagnose
 from mednlp.cdss.diagnose_range import merge_diagnose_range
 from mednlp.cdss.medical_record_backfill import BackFillTemplate
-from mednlp.cdss.suggest import DiagnoseSuggest
+# from mednlp.cdss.suggest import DiagnoseSuggest
 from mednlp.dao.kg_dao import KGDao
 from mednlp.kg.clinical_guide_disease import ClinicalGuideDisease
 from mednlp.kg.inspection import Inspection
@@ -31,6 +31,7 @@ from mednlp.text.value_status_transformer import ValueStatusTransformer
 from mednlp.utils.file_operation import get_disease_advice
 from mednlp.utils.file_operation import get_disease_advice_code
 from mednlp.utils.file_operation import get_disease_dept
+from mednlp.utils.file_operation import get_kg_docs
 
 
 ai_client = AIServiceClient(global_conf.cfg_path, 'AIService')
@@ -45,6 +46,7 @@ class DiagnoseService(BaseRequestHandler):
     disease_advice = get_disease_advice()
     disease_advice_code = get_disease_advice_code()
     disease_department = get_disease_dept()
+    kg_docs = get_kg_docs()
     suggest_dict = {
         'suggest_past_history_disease': [
             '高血压', '糖尿病', '冠心病', '脑血管病', '肺结核', '慢性肝病',
@@ -83,6 +85,18 @@ class DiagnoseService(BaseRequestHandler):
         suggest_dict[field] = []
         for name in names:
             suggest_dict[field].append({'entity_name': name})
+
+    default_disease_list = ['44238',
+                            '64406562-8643-11e7-b11b-1866da8f1f23',
+                            '118786A18629FC4AE0500A0AC86471F9',
+                            '6af282f3-31e1-11e6-804e-848f69fd6b70',
+                            '1bab728c-31e0-11e6-804e-848f69fd6b70']
+    splitter = '|'
+    fl_in_mr_field = {
+        'symptom_detail': 'chief_complaint',
+        'inspection': 'inspection',
+        'physical_examination': 'physical_examination'
+    }
 
     def initialize(self, runtime=None, **kwargs):
         super(DiagnoseService, self).initialize(runtime, **kwargs)
@@ -123,7 +137,7 @@ class DiagnoseService(BaseRequestHandler):
         systolic_blood_pressure = arguments['systolic_blood_pressure']
         diastolic_blood_pressure = arguments['diastolic_blood_pressure']
         fl = arguments['fl']
-        word_print = arguments['word_print']
+        # word_print = arguments['word_print']
         collected_medical_record = arguments['collected_medical_record']
         disease_set_code = arguments['disease_set']
         start = arguments['start']
@@ -215,65 +229,73 @@ class DiagnoseService(BaseRequestHandler):
         cc_times.append(time.time())
         if disease_pop and disease_pop[0].get('score', 0) < threshold:
             disease_pop = []
-        if disease_pop and disease_pop[0].get('score', 0):
-
-            try:
-                # 请求diagnose_reliability接口获取诊断可靠性
-                if rows < 5:
-                    update_accuracy_result = dr_client.query(
-                        json.dumps({'diseases': disease_pop[:5]},
-                                   ensure_ascii=False), 'diagnose_reliability')
-                    if update_accuracy_result['code'] != 0:
-                        raise ValueError
-                    disease_pop[:5] = update_accuracy_result['data'].get('diseases', [])
-                else:
-                    update_accuracy_result = dr_client.query(
-                        json.dumps({'diseases': disease_pop[:rows]},
-                                   ensure_ascii=False), 'diagnose_reliability')
-                    if update_accuracy_result['code'] != 0:
-                        raise ValueError
-                    disease_pop[:rows] = update_accuracy_result['data'].get('diseases', [])
-            except (BaseException, RuntimeError):
-                print('diagnose_reliability_api error!')
-
-                confidence, accuracy = [], []
-                if disease_pop and disease_pop[0].get('score', 0):
-                    for i in range(rows):
-                        confidence.append(disease_pop[i].get('score', 0))
-                    accuracy = copy.copy(confidence)
-                    if rows > 0:
-                        accuracy[0] *= 1.2
-                    if rows > 1:
-                        accuracy[1] *= 1.1
-                    accuracy = [round(x / sum(accuracy), 4) for x in accuracy]
-                    for i in range(rows):
-                        disease_pop[i]['accuracy'] = accuracy[i]
+        # if disease_pop and disease_pop[0].get('score', 0):
+        #
+        #     try:
+        #         # 请求diagnose_reliability接口获取诊断可靠性
+        #         if rows < 5:
+        #             update_accuracy_result = dr_client.query(
+        #                 json.dumps({'diseases': disease_pop[:5]},
+        #                            ensure_ascii=False), 'diagnose_reliability')
+        #             if update_accuracy_result['code'] != 0:
+        #                 raise ValueError
+        #             disease_pop[:5] = update_accuracy_result['data'].get('diseases', [])
+        #         else:
+        #             update_accuracy_result = dr_client.query(
+        #                 json.dumps({'diseases': disease_pop[:rows]},
+        #                            ensure_ascii=False), 'diagnose_reliability')
+        #             if update_accuracy_result['code'] != 0:
+        #                 raise ValueError
+        #             disease_pop[:rows] = update_accuracy_result['data'].get('diseases', [])
+        #     except (BaseException, RuntimeError):
+        #         print('diagnose_reliability_api error!')
+        #
+        #         confidence, accuracy = [], []
+        #         if disease_pop and disease_pop[0].get('score', 0):
+        #             for i in range(rows):
+        #                 confidence.append(disease_pop[i].get('score', 0))
+        #             accuracy = copy.copy(confidence)
+        #             if rows > 0:
+        #                 accuracy[0] *= 1.2
+        #             if rows > 1:
+        #                 accuracy[1] *= 1.1
+        #             accuracy = [round(x / sum(accuracy), 4) for x in accuracy]
+        #             for i in range(rows):
+        #                 disease_pop[i]['accuracy'] = accuracy[i]
 
         cc_times.append(time.time())
         total_count = len(disease_pop)
         disease_pop_org = disease_pop
         disease_pop = disease_pop[start: start + rows]
         disease_set = set()
-        disease_dict = {}
-        for disease in disease_pop:
-            disease_set.add(disease['disease_id'])
-            disease_dict[disease['disease_id']] = None
+        disease_dict, docs = {}, []
+        if disease_pop_org:
+            for disease in disease_pop:
+                disease_id = disease['disease_id']
+                disease_set.add(disease_id)
+                for doc in self.kg_docs:
+                    if doc['entity_id'] == disease_id:
+                        disease_dict[disease_id] = doc
+                        docs.append(doc)
+        else:
+            docs = [doc for doc in self.kg_docs
+                    if doc['entity_id'] in self.default_disease_list]
         # for disease in differential_diagnosis_disease:
         #     disease_set.add(disease['disease_id'])
         #     disease_dict[disease['disease_id']] = None
         # for disease in critical_disease:
         #     disease_set.add(disease['entity_id'])
         #     disease_dict[disease['entity_id']] = disease['entity_name']
-        fl = fl.replace('physical_examination', 'physical_examination_detail')
-        fl = fl.replace('inspection', 'inspection_json')
-        fl_extra = ['physical_examination_detail', 'inspection_json',
-                    'symptom_detail']
-        fl_inner = fl + ',' + ','.join(fl_extra)
-        fl_inner = fl_inner.replace('differential_diagnosis', 'DD')
+        # fl = fl.replace('physical_examination', 'physical_examination_detail')
+        # fl = fl.replace('inspection', 'inspection_json')
+        # fl_extra = ['physical_examination_detail', 'inspection_json',
+        #             'symptom_detail']
+        # fl_inner = fl + ',' + ','.join(fl_extra)
+        # fl_inner = fl_inner.replace('differential_diagnosis', 'DD')
 
-        disease_dict, docs, _ = kg.find_disease(
-            disease_dict, fl=fl_inner, rows=rows, start=start)
-        cc_times.append(time.time())
+        # disease_dict, docs, _ = kg.find_disease(
+        #     disease_dict, fl=fl_inner, rows=rows, start=start)
+        # cc_times.append(time.time())
 
         result = {'data': disease_pop}
         if api_code:
@@ -285,34 +307,35 @@ class DiagnoseService(BaseRequestHandler):
             return result
 
         if not disease_pop_org:
-            total_count = 590
+            # total_count = 590
             for doc in docs[0: rows]:
                 doc['disease_id'] = doc['entity_id']
                 doc['disease_name'] = doc['entity_name']
-                doc['accuracy'] = 0.0
+                # doc['accuracy'] = 0.0
                 doc['score'] = 0.0
                 disease_pop.append(doc)
-        suggest_disease = disease_pop_org
-        if not suggest_disease:
-            suggest_disease = docs[0: 5]
-        suggest = DiagnoseSuggest(suggest_disease)
-        cc_times.append(time.time())
-        extend_data = {
-            'suggest_symptom': suggest.symptom_suggest(),
-            'suggest_inspection': suggest.inspection_suggest(),
-            'suggest_physical_examination':
-                suggest.physical_examination_suggest()}
+        # suggest_disease = disease_pop_org
+        # if not suggest_disease:
+        #     suggest_disease = docs[0: 5]
+        # suggest = DiagnoseSuggest(suggest_disease)
+        # cc_times.append(time.time())
+        # extend_data = {
+        #     'suggest_symptom': suggest.symptom_suggest(),
+        #     'suggest_inspection': suggest.inspection_suggest(),
+        #     'suggest_physical_examination':
+        #         suggest.physical_examination_suggest()}
 
         delete_list = []
         for disease in disease_pop:
             self.update_disease(disease, disease_dict, fl, delete_list,
                                 self.disease_advice, self.disease_advice_code,
-                                self.disease_department, disease_set_code)
+                                self.disease_department, disease_set_code,
+                                medical_record)
         for disease in delete_list:
             disease_pop.remove(disease)
-        # 过滤未找到相关疾病名称的疾病
-        disease_pop = [disease for disease in disease_pop if 'disease_name' in disease]
-
+        # # 过滤未找到相关疾病名称的疾病
+        # disease_pop = [disease for disease in disease_pop if 'disease_name' in disease]
+        #
         # delete_list = []
         # for disease in critical_disease:
         #     self.update_disease(disease, disease_dict, fl, delete_list,
@@ -320,9 +343,9 @@ class DiagnoseService(BaseRequestHandler):
         #                         self.disease_department, disease_set_code)
         # for disease in delete_list:
         #     critical_disease.remove(disease)
-        # 未查寻到危重症相关信息，过滤该危重症
+        # # 未查寻到危重症相关信息，过滤该危重症
         # critical_disease = [cd for cd in critical_disease if cd.get('disease_name')]
-
+        #
         # delete_list = []
         # for disease in differential_diagnosis_disease:
         #     self.update_disease(disease, disease_dict, fl, delete_list,
@@ -330,7 +353,7 @@ class DiagnoseService(BaseRequestHandler):
         #                         self.disease_department, disease_set_code)
         # differential_diagnosis_disease = rule_diagnose.sort_differential_diagnosis(
         #     differential_diagnosis_disease)
-
+        #
         # trans_disease_name_dict = {}
         # if disease_set_code:
         #     disease_names = [d.get('disease_name', '') for d in disease_pop
@@ -339,46 +362,46 @@ class DiagnoseService(BaseRequestHandler):
         #     differential_diagnosis_disease = self._update_disease_set_name(
         #         differential_diagnosis_disease, trans_disease_name_dict, fl)
         # extend_data.update({'differential_diagnosis_merge': differential_diagnosis_disease})
-
+        #
         # critical_d_list = []
         # for cd_dict in critical_disease:
         #     critical_d_list.append(cd_dict.get('disease_name', ''))
-
+        #
         # critical_critical_d_str = ','.join(critical_d_list)
         # critical_clinical_data = self._disease_highlight(
         #     medical_record, critical_critical_d_str, word_print)
         # new_critical_disease = self._disease_clinical_guide(
         #     critical_disease, critical_clinical_data, fl)
-
+        #
         # if disease_set_code:
         #     new_critical_disease = self._update_disease_set_name(
         #         new_critical_disease, trans_disease_name_dict, fl)
         # extend_data.update({'match_symptom': match_symptom,
         #                     'critical_disease': new_critical_disease})
         # extend_data.update(self.suggest_dict)
-
-        for result_field, fields in self.suggest_filter_field.items():
-            for field in fields:
-                field_value = arguments.get(field, None)
-                extend_data[result_field] = self._exist_entity_filter(
-                    field_value, extend_data.get(result_field, []))
+        #
+        # for result_field, fields in self.suggest_filter_field.items():
+        #     for field in fields:
+        #         field_value = arguments.get(field, None)
+        #         extend_data[result_field] = self._exist_entity_filter(
+        #             field_value, extend_data.get(result_field, []))
         result.update({'totalCount': total_count,
                        # 'extend_data': extend_data,
                        'q_time': int((time.time() - start_time) * 1000)})
-        ## 添加fl开关
-        disease_list = [disease.get('disease_name', '') for disease in disease_pop]
-        disease_str = ','.join(disease_list)
-        cc_times.append(time.time())
-
-        clinical_highlight_data = self._disease_highlight(
-            medical_record, disease_str, word_print)
-        new_disease_pop = self._disease_clinical_guide(
-            disease_pop, clinical_highlight_data, fl)
-
+        # ## 添加fl开关
+        # disease_list = [disease.get('disease_name', '') for disease in disease_pop]
+        # disease_str = ','.join(disease_list)
+        # cc_times.append(time.time())
+        #
+        # clinical_highlight_data = self._disease_highlight(
+        #     medical_record, disease_str, word_print)
+        # new_disease_pop = self._disease_clinical_guide(
+        #     disease_pop, clinical_highlight_data, fl)
+        #
         # if disease_set_code:
         #     new_disease_pop = self._update_disease_set_name(
         #         new_disease_pop, trans_disease_name_dict, fl)
-        result.update({'data': new_disease_pop})
+        # result.update({'data': new_disease_pop})
 
         cc_times.append(time.time())
         if time.time() - start_time > 2:
@@ -389,7 +412,7 @@ class DiagnoseService(BaseRequestHandler):
 
     def update_disease(self, disease, disease_dict, fl, delete_list,
                        disease_advice, disease_advice_code, disease_department,
-                       disease_set_code):
+                       disease_set_code, medical_record):
         disease_id = disease.get('disease_id')
         if not disease_id:
             disease_id = disease['entity_id']
@@ -408,20 +431,21 @@ class DiagnoseService(BaseRequestHandler):
                 disease['advice_code'] = disease_advice_code[disease_name]
             if 'department' in fl and disease_name in disease_department:
                 disease['department'] = disease_department[disease_name]
-        if 'symptom_detail' not in fl:
-            disease.pop('symptom_detail', None)
+        symptom_detail = disease.pop('symptom_detail', None)
+        if symptom_detail and 'symptom_detail' in fl:
+            disease = self.split_property_detail(
+                disease, symptom_detail, 'symptom_detail')
+            if 'symptom_detail' in disease:
+                disease = self.highlight_key_factor(
+                    disease, 'symptom_detail', medical_record)
         physical_examination_detail = disease.pop(
             'physical_examination_detail', None)
         if physical_examination_detail and 'physical_examination' in fl:
-            physical_examinations = disease.setdefault(
-                'physical_examination', [])
-            for detail in physical_examination_detail:
-                detail_list = detail.split('|')
-                if len(detail_list) < 2:
-                    continue
-                entity_id, entity_name = detail_list[0], detail_list[1]
-                physical_examinations.append({'entity_id': entity_id,
-                                              'entity_name': entity_name})
+            disease = self.split_property_detail(
+                disease, physical_examination_detail, 'physical_examination')
+            if 'physical_examination' in disease:
+                disease = self.highlight_key_factor(
+                    disease, 'physical_examination', medical_record)
         inspection_detail = disease.pop('inspection_json', None)
         if inspection_detail and 'inspection' in fl:
             inspection_detail = json.loads(inspection_detail)
@@ -429,6 +453,9 @@ class DiagnoseService(BaseRequestHandler):
             for detail in inspection_detail:
                 detail.update(i_builder.build_entity(detail))
             disease['inspection'] = inspection_detail
+            if 'inspection' in disease:
+                disease = self.highlight_key_factor(
+                    disease, 'inspection', medical_record)
         if disease_set_code:
             if disease_set_code == 1:
                 query = dict()
@@ -449,6 +476,26 @@ class DiagnoseService(BaseRequestHandler):
                 if 'disease_code' in fl:
                     disease['disease_code'] = converted_id
         return
+
+    def split_property_detail(self, disease, property_detail, property_name):
+        property_detail_list = disease.setdefault(property_name, [])
+        for detail in property_detail:
+            detail_list = detail.split(self.splitter)
+            if len(detail_list) < 2:
+                continue
+            entity_id, entity_name = detail_list[0], detail_list[1]
+            property_detail_list.append({'entity_id': entity_id,
+                                         'entity_name': entity_name})
+        return disease
+
+    def highlight_key_factor(self, disease, property_name, medical_record):
+        for property_detail in disease[property_name]:
+            if property_detail['entity_name'] in medical_record[
+                self.fl_in_mr_field[property_name]]:
+                property_detail['highlight_mode'] = 1
+            else:
+                property_detail['highlight_mode'] = 0
+        return disease
 
     def _update_disease_set_name(self, diseases, trans_disease_name_dict, fl):
         """转化为相应疾病名称集合中疾病名字和id"""
@@ -536,6 +583,5 @@ if __name__ == '__main__':
     ad = AidDiagnose(debug=False,
                      lstm_port=options.lstm_port, cnn_port=options.cnn_port)
     kg = KGDao()
-    highlight_model = ClinicalGuideDisease()
     handlers = [(r'/diagnose_service', DiagnoseService)]
     base_service.run(handlers)

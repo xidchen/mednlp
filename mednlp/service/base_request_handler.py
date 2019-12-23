@@ -47,7 +47,9 @@ class BaseRequestHandler(BaseService):
         query_str = self.request.body
         headers = self.request.headers
         content_type = headers.get('Content-type', None)
-        if content_type and 'application/json' in content_type and query_str:
+        if content_type and query_str and (
+                'application/json' in content_type or
+                'application/x-www-form-urlencoded' in content_type):
             request_type = 'body_json'
             query = json.loads(query_str, encoding='utf-8')
             for key, val in arguments.items():
