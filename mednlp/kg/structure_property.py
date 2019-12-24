@@ -164,7 +164,7 @@ class Property(object):
         patt_re1 = ('[\d一二三四五两六七八九十]{1,2}'
                     '(周|星期|日|天|月|个月|年|分钟|小时|个小时|秒)'
                     '[\d一二三四五两六七八九十]{1,2}[回次]')
-        patt_re2 = '每?[日天晚]?\d{1,3}[次支](\/)?[天日周月分]?'
+        patt_re2 = '每?[日天晚]?\d{1,3}(-\d{1,3})?[次支](\/)?[天日周月分]?'
         patt_re3 = '[\d一二两三四五六七八九十]{1,3}[回次]'
         if re.search(patt_re1, fre_candidate):
             search_value = re.search(patt_re1, fre_candidate).group()
@@ -483,7 +483,7 @@ class Property(object):
         dosage_result = []
         dosage_sen = self._candidate_modify(entity)
         pattern1 = '[每|一|单]次\d{1,3}(ml|g|l|kg|μg|mg|ug|毫升|升|片|粒|微克|克|千克|毫克)'
-        pattern2 = '\d{1,3}(\.)?\d?(ml|g|l|kg|μg|mg|ug|毫升|升|片|袋|粒|微克|克|千克|毫克)(\/)?[次日天]?'
+        pattern2 = '\d{1,3}(\.\d{1,3})?(ml|g|l|kg|μg|mg|ug|毫升|升|片|袋|粒|微克|克|千克|毫克)(\/)?[次日天]?'
         if re.findall(pattern1, dosage_sen):
             value = re.search(pattern1, self.content).group()
             position = re.search(pattern1, self.content)
