@@ -11,10 +11,7 @@ Create on 2017-05-27 星期六.
 from __future__ import print_function
 import os
 import numpy
-import tensorflow as tf
 import codecs
-from keras.utils.np_utils import to_categorical
-from keras.preprocessing.sequence import pad_sequences
 
 
 class Key2Value(object):
@@ -56,6 +53,7 @@ def prepare_data(seqs, labels, maxlen=None):
     length.
     This swap the axis!
     """
+    import tensorflow as tf
     # x: a list of sentences
     lengths = [len(s) for s in seqs]
 
@@ -242,11 +240,15 @@ def process_line(line):
 
 def generate_arrays_from_file(path, batch_size, num=200, classes=45, padding='pre'):
     """
-
     :param path: 训练数据路径
     :param batch_size:每次读取文件行数
-    :return: 返回x和y的训练数据 其中x已经padding 而y已经to_catego
+    :param num:
+    :param classes:
+    :param padding:
+    :return: 返回x和y的训练数据 其中x已经padding 而y已经to_categorical
     """
+    from keras.utils.np_utils import to_categorical
+    from keras.preprocessing.sequence import pad_sequences
     while 1:
         f = codecs.open(path, 'r', encoding='utf-8')
         cnt = 0
@@ -266,7 +268,6 @@ def generate_arrays_from_file(path, batch_size, num=200, classes=45, padding='pr
                 yield (numpy.array(X), numpy.array(Y))
                 X = []
                 Y = []
-    f.close()
 
 
 def get_test_data(test_file, num=200, classes=45, padding='pre'):
@@ -277,11 +278,14 @@ def get_test_data(test_file, num=200, classes=45, padding='pre'):
     :param padding: padding的方式
     :return: 返回训练数据
     """
+    from keras.utils.np_utils import to_categorical
+    from keras.preprocessing.sequence import pad_sequences
     print('test', num, classes)
     x_test, y_test = load_file(test_file)
     x_test = pad_sequences(x_test, padding=padding, maxlen=num)
     y_test = to_categorical(y_test, num_classes=classes)
     return x_test, y_test
 
+
 if __name__ == '__main__':
-    load_data_intention_union('/home/renyx/work/model_data/intent_2019/04_09/lstm_union_train_04_09.txt')
+    pass
