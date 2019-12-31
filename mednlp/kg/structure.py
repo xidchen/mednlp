@@ -169,7 +169,7 @@ class EntityProperty(Property):
             char_dict['degree_result'] = self.get_entity_degree()
             char_dict['smell_result'] = self.get_entity_smell()
             char_dict['color_result'] = self.get_entity_color()
-        elif  pos == 'nd':
+        elif pos == 'nd':
             char_dict['body_result'] = self.get_entity_body_part()
             char_dict['cause_result'] = self.get_entity_cause()
             char_dict['change_result_add'] = self.get_entity_exacerbation()
@@ -463,11 +463,11 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """WBC7.0×109/L"""
+    sentence0 = """间断性头晕8年，加重1月"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""
-    print('=======================================')
     model1 = StructuredModel()
     sym_doc_tree0 = model1.structured_method(sentence0, 'disease', list_entity)
+    print('=======================================')
     print(Encode(sym_doc_tree0))

@@ -377,16 +377,16 @@ class Property(object):
         change_result = []
         change_candidate = ''.join([x[2] for x in self.candidate_words])
         change_pos = [x[1] for x in self.candidate_words]
-        pos_have = True if 'ncf' in change_pos else False
+        pos_have = True if 'nca' in change_pos else False
 
         for k in self.candidate_words:
             if pos_have:
-                if k[1] == 'ncf':
+                if k[1] == 'nca':
                     if re.findall(
-                            k[2] + '.{0,5}' + '(?:加重|恶化|变差|变坏|扩散|再发|为甚|为著)',
+                            '(?:加重|恶化|变差|变坏|扩散|再发|为甚|为著)',
                             change_candidate):
                         text = re.findall(
-                            k[2] + '.{0,5}' + '(?:加重|恶化|变差|变坏|扩散|再发|为甚|为著)',
+                            '(?:加重|恶化|变差|变坏|扩散|再发|为甚|为著)',
                             change_candidate)[0]
                         value = re.sub('[时后]', '', k[2])
                         position = re.search(text, self.content).span()
@@ -402,16 +402,16 @@ class Property(object):
         change_candidate = ''.join([x[2] for x in self.candidate_words])
 
         change_pos = [x[1] for x in self.candidate_words]
-        pos_have = True if 'ncf' in change_pos else False
+        pos_have = True if 'ncd' in change_pos else False
 
         for k in self.candidate_words:
             if pos_have:
-                if k[1] == 'ncf':
+                if k[1] == 'ncd':
                     if re.findall(
-                            k[2] + '.{0,5}' + '(?:减轻|缓解|改善|消散|消退|消失|变好|好转)',
+                            '(?:减轻|缓解|改善|消散|消退|消失|变好|好转)',
                             change_candidate):
                         text = re.findall(
-                            k[2] + '.{0,5}' + '(?:减轻|缓解|改善|消散|消退|消失|变好|好转)',
+                            '(?:减轻|缓解|改善|消散|消退|消失|变好|好转)',
                             change_candidate)[0]
                         value = re.sub('[时后]', '', k[2])
                         position = re.search(text, self.content).span()
