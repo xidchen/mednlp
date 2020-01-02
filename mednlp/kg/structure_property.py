@@ -483,7 +483,8 @@ class Property(object):
         dosage_result = []
         dosage_sen = self._candidate_modify(entity)
         pattern1 = '[每|一|单]次\d{1,3}(ml|g|l|kg|μg|mg|ug|毫升|升|片|粒|微克|克|千克|毫克)'
-        pattern2 = '\d{1,3}(\.\d{1,3})?(ml|g|l|kg|μg|mg|ug|毫升|升|片|袋|粒|微克|克|千克|毫克)(\/)?[次日天]?'
+        pattern2 = ('\d{1,3}(\.\d{1,3})?(ml|g|l|kg|μg|mg|ug|毫升|升|片|袋|粒|微克|克|千克|毫克)'
+                   '(\/)?[次日天]?(\s+(q\d?d|bid|tid|qid|q\d?h|qn|qod|biw))?')
         if re.findall(pattern1, dosage_sen):
             value = re.search(pattern1, self.content).group()
             position = re.search(pattern1, self.content)
