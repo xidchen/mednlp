@@ -484,7 +484,7 @@ class Property(object):
         dosage_sen = self._candidate_modify(entity)
         pattern1 = '[每|一|单]次\d{1,3}(ml|g|l|kg|μg|mg|ug|毫升|升|片|粒|微克|克|千克|毫克)'
         pattern2 = ('\d{1,3}(\.\d{1,3})?(ml|g|l|kg|μg|mg|ug|毫升|升|片|袋|粒|微克|克|千克|毫克)'
-                   '(\/)?[次日天]?(\s+(q\d?d|bid|tid|qid|q\d?h|qn|qod|biw))?')
+                   '(\/)?[次日天周月]?(\s+(q\d?d|bid|tid|qid|q\d?h|qn|qod|biw))?')
         if re.findall(pattern1, dosage_sen):
             value = re.search(pattern1, self.content).group()
             position = re.search(pattern1, self.content)
@@ -508,7 +508,8 @@ class Property(object):
         effect_result = []
         effect_sen = ''.join([l[2] for l in self.candidate_words])
 
-        pattern = '(病情|症状)?(相对)?[有无]?(成功|失败|稳定|顺利|加重|恶化|减轻|缓解|消散|消退|好转|效果不佳)'
+        pattern = ('(病情|症状)?(相对|较前)?[有无略]?'
+                   '(成功|失败|稳定|顺利|加重|恶化|减轻|缓解|改善|消散|消退|好转|效果不佳)')
         if re.findall(pattern, effect_sen):
             value = re.search(pattern, self.content).group()
             position = re.search(pattern, self.content)

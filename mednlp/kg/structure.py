@@ -188,6 +188,7 @@ class EntityProperty(Property):
             char_dict['size_result'] = self.get_entity_size(pos)
             char_dict['num_result'] = self.get_entity_num()
         elif pos == 'nm':
+            char_dict['effect_result'] = self.get_entity_effect()
             char_dict['efficacy_result'] = self.get_entity_efficacy()
             char_dict['route_result'] = self.get_entity_route()
             char_dict['dosage_result'] = self.get_entity_dosage(entity[index])
@@ -463,7 +464,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """神经系统检查：膝反射和肱二,三头肌健反射正常存在"""
+    sentence0 = """2015-04-08就诊光华医院，查“ RF IgA＞300IU/ml、 RF IgG230.77U/ml、抗CCP1600RU/m1、血沉及CRP正常”，予以“甲氨蝶呤7.5mg/周、乐松”等治疗后症状较前略改善。"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""
