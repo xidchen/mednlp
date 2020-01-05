@@ -7,6 +7,7 @@ Create on 2019.03.11
 """
 
 import re
+from mednlp.utils.file_operation import get_unit_name
 
 
 class Property(object):
@@ -15,6 +16,7 @@ class Property(object):
         super(Property, self).__init__()
         self.candidate_words = candidate_words
         self.content = content
+        self.unit_dict = get_unit_name()
 
     ## 实体状态
     def entity_flag_status(self, entity):
@@ -196,8 +198,7 @@ class Property(object):
         if pos == 'ne':
             type_name1, type_name2 = 'value', 'value'
         else:
-            type_name1 = 'size'
-            type_name2 = 'num'
+            type_name1, type_name2 = 'size', 'num'
 
         # size_candidate = ''.join([x[2] for x in self.candidate_words])
 
@@ -222,9 +223,7 @@ class Property(object):
             size_result.append(size02)
 
         for index1, k in enumerate(self.candidate_words):
-            if k[2] == 'g':
-                k[1]='ni'
-            if k[1] in ['ni']:
+            if k[2] in self.unit_dict:
                 size_sen = ''.join([l[2] for l in self.candidate_words[:index1 + 1]])
                 size_sen = size_sen.replace('\*', '*').replace('\+', '+').replace('\-', '-')
                 ## 由于单位中存在特殊符号/ 导致字典中词不能导入的结巴中，在此处，直接用规则匹配
@@ -245,7 +244,6 @@ class Property(object):
                         size_result.append(size)
                     else:
                         pass
-
                 else:
                     value = re.findall(
                         '\d*?[*×+.\-/]?\d*[*×+.\-/]?\d+' + k[2], self.content)
@@ -507,7 +505,6 @@ class Property(object):
     def get_entity_effect(self):
         effect_result = []
         effect_sen = ''.join([l[2] for l in self.candidate_words])
-
         pattern = ('(病情|症状)?(相对|较前)?[有无略]?'
                    '(成功|失败|稳定|顺利|加重|恶化|减轻|缓解|改善|消散|消退|好转|效果不佳)')
         if re.findall(pattern, effect_sen):
@@ -526,10 +523,7 @@ class Property(object):
         value_sen_or = self._candidate_modify(entity)
         value_sen = re.split('[，。；,]', value_sen_or)[0]
         sen_tr = re.search(entity, self.content)
-        if sen_tr:
-            position_tr = sen_tr.span()[0]
-        else:
-            position_tr = 0
+        position_tr = sen_tr.span()[0] if sen_tr else 0
         value_result = self._add_value(position_tr, value_sen_or)
         patt_ex = '\d{1,}\.?\d{0,}\%'
         patt_va = '[：:].+?[，。；,）]'

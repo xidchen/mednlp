@@ -149,5 +149,14 @@ def get_kg_docs():
     return dictionary
 
 
+def get_unit_name():
+    f = codecs.open(global_conf.unit_dict_path)
+    dictionary = {}
+    for row in f:
+        row = row.strip().split('\t')
+        dictionary[row[0]] = row[1]
+    return dictionary
+
+
 if __name__ == '__main__':
     pass

@@ -464,7 +464,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """2015-04-08就诊光华医院，查“ RF IgA＞300IU/ml、 RF IgG230.77U/ml、抗CCP1600RU/m1、血沉及CRP正常”，予以“甲氨蝶呤7.5mg/周、乐松”等治疗后症状较前略改善。"""
+    sentence0 = """于2019-06-05就诊我院，查ESR 57mm/H,IgG10.4g/L,RF IgA＞200RU/ml, RF IgM＞200RU/ml,抗CCP＞1600RU/ml,抗核抗体均质型,抗P-ANCA抗体弱阳性，子以甲氨蝶呤10mg/周,乐松,珍宝丸,骨化三醇,碳酸钙等治疗后仍有关节肿痛。"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""
