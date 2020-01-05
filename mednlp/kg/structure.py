@@ -187,6 +187,7 @@ class EntityProperty(Property):
             char_dict['body_result'] = self.get_entity_body_part()
             char_dict['size_result'] = self.get_entity_size(pos)
             char_dict['num_result'] = self.get_entity_num()
+            _, char_dict['status_result'] = self.entity_flag_status(entity[index])
         elif pos == 'nm':
             char_dict['effect_result'] = self.get_entity_effect()
             char_dict['efficacy_result'] = self.get_entity_efficacy()
@@ -464,7 +465,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """于2019-06-05就诊我院，查ESR 57mm/H,IgG10.4g/L,RF IgA＞200RU/ml, RF IgM＞200RU/ml,抗CCP＞1600RU/ml,抗核抗体均质型,抗P-ANCA抗体弱阳性，子以甲氨蝶呤10mg/周,乐松,珍宝丸,骨化三醇,碳酸钙等治疗后仍有关节肿痛。"""
+    sentence0 = """双手未见尺侧偏斜，天鹅颈，钮扣花样畸形。张口无困难。"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""
