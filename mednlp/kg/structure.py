@@ -183,6 +183,7 @@ class EntityProperty(Property):
             char_dict['num_result'] = self.get_entity_num()
             if not(char_dict.get('size_result') and char_dict.get('num_result')):
                 char_dict['value_result'] = self.get_entity_value(entity[index])
+            char_dict['nature_result'] = self.get_entity_nature()
         elif pos in ['np', 'ei', 'er']:
             char_dict['body_result'] = self.get_entity_body_part()
             char_dict['size_result'] = self.get_entity_size(pos)
@@ -465,7 +466,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """监测BP130-140/80-90mmHg"""
+    sentence0 = """于2010-06-29行腹透置管术"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""
