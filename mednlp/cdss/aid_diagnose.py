@@ -64,7 +64,6 @@ class AidDiagnose(object):
         self.disease_physical_exam_filter = get_disease_physical_exam_filter()
         self.disease_past_medical_history_filter = get_disease_past_medical_history_filter()
         self.disease_symptom_filter = get_disease_symptom_filter()
-        self.symptom_wy_name = get_symptom_name()
         self.body_part_name = []
         self.inspection_name = []
         self.physical_exam_name = []
