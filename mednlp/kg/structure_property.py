@@ -376,16 +376,13 @@ class Property(object):
         change_candidate = ''.join([x[2] for x in self.candidate_words])
         change_pos = [x[1] for x in self.candidate_words]
         pos_have = True if 'nca' in change_pos else False
+        patt = '(?:加重|恶化|变差|变坏|扩散|再发|为甚|为著)'
 
         for k in self.candidate_words:
             if pos_have:
                 if k[1] == 'nca':
-                    if re.findall(
-                            '(?:加重|恶化|变差|变坏|扩散|再发|为甚|为著)',
-                            change_candidate):
-                        text = re.findall(
-                            '(?:加重|恶化|变差|变坏|扩散|再发|为甚|为著)',
-                            change_candidate)[0]
+                    if re.findall(patt, change_candidate):
+                        text = re.findall(patt, change_candidate)[0]
                         value = re.sub('[时后]', '', k[2])
                         position = re.search(text, self.content).span()
                         change = {'text': text, 'type': 'exacerbation',
@@ -398,19 +395,15 @@ class Property(object):
         """实体  诱因 + 转归  or 变好"""
         change_result = []
         change_candidate = ''.join([x[2] for x in self.candidate_words])
-
         change_pos = [x[1] for x in self.candidate_words]
         pos_have = True if 'ncd' in change_pos else False
+        patt = '(?:减轻|缓解|改善|消散|消退|消失|变好|好转)'
 
         for k in self.candidate_words:
             if pos_have:
                 if k[1] == 'ncd':
-                    if re.findall(
-                            '(?:减轻|缓解|改善|消散|消退|消失|变好|好转)',
-                            change_candidate):
-                        text = re.findall(
-                            '(?:减轻|缓解|改善|消散|消退|消失|变好|好转)',
-                            change_candidate)[0]
+                    if re.findall(patt, change_candidate):
+                        text = re.findall(patt, change_candidate)[0]
                         value = re.sub('[时后]', '', k[2])
                         position = re.search(text, self.content).span()
                         change = {'text': text, 'type': 'alleviate',
