@@ -245,10 +245,9 @@ class Property(object):
                     else:
                         pass
                 else:
-                    value = re.findall(
-                        '\d*?[*×+.\-/]?\d*[*×+.\-/]?\d+' + k[2], self.content)
-                    position = re.search(
-                        '\d*?[*×+.\-/]?\d*[*×+.\-/]?\d+' + k[2], self.content)
+                    patt = '\d*[*×+.\-/]?\d*?[*×+.\-/]?\d*[*×+.\-/]?\d*' + k[2]
+                    value = re.findall(patt, self.content)
+                    position = re.search(patt, self.content)
                     if value:
                         size_candidate = value[0]  # + k[2]
                         val = value[0].replace(k[2], '')
