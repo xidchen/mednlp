@@ -571,17 +571,20 @@ class Property(object):
 
     def _add_value(self, position_tr, value_sen_or):
         value_result = []
-        patt1 = '(阴性|阳性|\+|\-)'
+        patt1 = '(均质型|弱阳性|弱阴性|阳性|阴性)'
         patt2 = '[<>＜＞]\d{1,}\.?\d{0,}'
+        patt3 = '(\+|\-)'
         match_patt1 = re.search(patt1, value_sen_or)
         match_patt2 = re.search(patt2, value_sen_or)
-        for match_patt in [match_patt1, match_patt2]:
+        match_patt3 = re.search(patt3, value_sen_or)
+        for match_patt in [match_patt1, match_patt2, match_patt3]:
             if match_patt:
                 text_match = match_patt.group()
                 position_match = [x + position_tr for x in match_patt.span()]
                 value = {'text': text_match, 'type': 'value',
                          'value': text_match, 'position': position_match}
                 value_result.append(value)
+                break
         return value_result
 
     def _candidate_modify(self, entity):
