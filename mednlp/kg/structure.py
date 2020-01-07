@@ -186,6 +186,7 @@ class EntityProperty(Property):
             char_dict['nature_result'] = self.get_entity_nature()
         elif pos in ['np', 'ei', 'er']:
             char_dict['body_result'] = self.get_entity_body_part()
+            char_dict['cause_result'] = self.get_entity_cause()
             char_dict['size_result'] = self.get_entity_size(pos)
             char_dict['num_result'] = self.get_entity_num()
             _, char_dict['status_result'] = self.entity_flag_status(entity[index])
@@ -468,7 +469,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """当晚出现弥漫性腹痛，伴腹透引出液颜色加深，可见絮状物，伴腹透超滤量减少"""
+    sentence0 = """制霉菌素 2# tid po"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""

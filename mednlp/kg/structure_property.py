@@ -457,7 +457,7 @@ class Property(object):
         route_result = []
         route_sen = "".join([l[2] for l in self.candidate_words])
 
-        pattern = '(口服|注射|含服|皮下注射|静脉注射|涂抹|肌肉注射|肌注|穴位注射|直肠滴入|吸入|气雾剂吸入)'
+        pattern = '(口服|注射|含服|皮下注射|静脉注射|涂抹|入腹|肌肉注射|肌注|穴位注射|直肠滴入|吸入|气雾剂吸入|po)'
         if re.findall(pattern, route_sen):
             value = re.findall(pattern, route_sen)[0]
             position = re.search(pattern, self.content)
@@ -473,8 +473,8 @@ class Property(object):
     def get_entity_dosage(self, entity):
         dosage_result = []
         dosage_sen = self._candidate_modify(entity)
-        pattern1 = '[每|一|单]次\d{1,3}(ml|g|l|kg|μg|mg|ug|毫升|升|片|粒|微克|克|千克|毫克)'
-        pattern2 = ('\d{1,3}(\.\d{1,3})?(ml|g|l|kg|μg|mg|ug|毫升|升|片|袋|粒|微克|克|千克|毫克)'
+        pattern1 = '[每|一|单]次\d{1,3}(ml|g|l|kg|μg|mg|ug|毫升|升|片|粒|#|微克|克|千克|毫克)'
+        pattern2 = ('\d{1,3}(\.\d{1,3})?(ml|g|l|kg|μg|mg|ug|毫升|升|片|袋|粒|#|微克|克|千克|毫克)'
                    '(\/)?[次日天周月]?(\s+(q\d?d|bid|tid|qid|q\d?h|qn|qod|biw))?')
         if re.findall(pattern1, dosage_sen):
             value = re.search(pattern1, self.content).group()
