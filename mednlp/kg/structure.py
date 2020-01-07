@@ -469,7 +469,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """制霉菌素 2# tid po"""
+    sentence0 = """近一周来，患者精神,睡眠尚可，食欲欠佳，尿量500ml/d"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""
