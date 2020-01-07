@@ -469,7 +469,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """WBC 11.5*10^9/L，N 86.1%，L 0.89*10^9/L，Hgb 117g/L，PLT 201*10^9/L；血CRP 5mg/L；生化 ALT 13u/L，Alb 37.4g/L，Cr 869μmol/L，K 4.7mmol/L，Na 140.5mmol/L，Ca 2.46mmol/L，P 1.57mmol/L，TCO 26.7mmol/L，胰淀粉酶 97u/L，脂肪酶 90u/L"""
+    sentence0 = """T36.0℃ P82次/分 R20次/分 BP136/75mmHg SpO2 96% Ht 163cm Wt 69.9kg BMI 26.30kg/m2"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""
