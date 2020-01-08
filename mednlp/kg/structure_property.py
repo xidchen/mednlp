@@ -452,6 +452,23 @@ class Property(object):
             pass
         return efficacy_result
 
+    ## 药敏
+    def get_entity_sensitivity(self):
+        sensitivity_result = []
+        sensitivity_sen = ''.join([l[2] for l in self.candidate_words])
+
+        pattern = '(中介|耐药|敏感)'
+        if re.findall(pattern, sensitivity_sen):
+            value = re.findall(pattern, sensitivity_sen)[0]
+            position = re.search(pattern, self.content)
+            position = list(position.span())
+            efficacy = {'text': value, 'type': 'sensitivity',
+                        'value': value, 'position': position}
+            sensitivity_result.append(efficacy)
+        else:
+            pass
+        return sensitivity_result
+
     ## 给药方式
     def get_entity_route(self):
         route_result = []

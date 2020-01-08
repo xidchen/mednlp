@@ -195,6 +195,7 @@ class EntityProperty(Property):
         elif pos == 'nm':
             char_dict['effect_result'] = self.get_entity_effect()
             char_dict['efficacy_result'] = self.get_entity_efficacy()
+            char_dict['sensitivity_result'] = self.get_entity_sensitivity()
             char_dict['route_result'] = self.get_entity_route()
             char_dict['dosage_result'] = self.get_entity_dosage(entity[index])
         elif pos == 'tr':
