@@ -470,7 +470,7 @@ class StructuredModel(EntityCharRelation):
 
 
 if __name__ == '__main__':
-    sentence0 = """T36.0℃ P82次/分 R20次/分 BP136/75mmHg SpO2 96% Ht 163cm Wt 69.9kg BMI 26.30kg/m2"""
+    sentence0 = """10-07 08:00早饭后觉右上肢无力较前加重，右下肢行走拖曳"""
     sentence1 = """遂再次分别于2016年10月30日、11月25日、12月16日、2017年1月、2017年2月
     入住我科给予TAC（多西他赛+多柔比星+环磷酰胺）联合化疗6周期"""
     sentence2 = """心前区疼痛，鼻活组织检查，鼻骨CT平扫，肺中叶钙化灶"""

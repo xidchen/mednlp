@@ -54,7 +54,9 @@ class Property(object):
         time_result = []
         ### 指代性时间
         time_candidate = ''.join([x[2] for x in self.candidate_words])
-        time_patt = '入院时|入院后|出院时|出院后|自幼|今晨|近日|当晚'
+        time_patt_1 = '入院时|入院后|出院时|出院后|自幼|今晨|近日|当晚'
+        time_patt_2 = '饭后|早饭后|午饭后|晚饭后|餐后|早餐后|午餐后|晚餐后'
+        time_patt = time_patt_1 + '|' + time_patt_2
         if re.findall(time_patt, time_candidate):
             time = re.findall(time_patt, time_candidate)[0]
             time_dict = {'text': time, 'type': 'time_happen', 'value': time}
@@ -77,6 +79,9 @@ class Property(object):
                         time_dict = {'text': time, 'type': 'time_happen', 'value': time}
                         time_result.append(time_dict)
                     elif re.findall('[前今早晚]', time):
+                        time_dict = {'text': time, 'type': 'time_happen', 'value': time}
+                        time_result.append(time_dict)
+                    elif re.findall('\d{2}:\d{2}', time):
                         time_dict = {'text': time, 'type': 'time_happen', 'value': time}
                         time_result.append(time_dict)
                     else:
