@@ -21,7 +21,7 @@ class Property(object):
     ## 实体状态
     def entity_flag_status(self, entity):
         """实体状态"""
-        flag = 2
+        flag = 0
         status_result = []
         entity_index = 0
         sen = self.content
@@ -31,20 +31,44 @@ class Property(object):
             else:
                 pass
         # min_index = max(0, entity_index-) ## 状态限定词一般出现在 症状前面。限定5个词以内
-        status_sen_or = [l for l in self.candidate_words[0: entity_index]]
+        status_sen_or = (self.candidate_words[:entity_index]
+                         + self.candidate_words[entity_index:])
         for k in status_sen_or:
             if k[1] in ['ve']:
                 value = re.sub('[但伴]', '', k[2])
-                flag = 0
+                flag = 1
                 position_ls = [x.span() for x in re.finditer(value, sen)]
                 position = position_ls[0] if position_ls else []
-                status = {'text': value, 'type': 'status', 'value': '无', 'position': position}
+                status = {'text': value, 'type': 'status', 'value': '无',
+                          'position': position}
                 status_result.append(status)
             elif k[1] in ['vp']:
-                flag = 1
-                position_ls = [x.span() for x in re.finditer((k[2]), sen)]
+                flag = 2
+                position_ls = [x.span() for x in re.finditer(k[2], sen)]
                 position = position_ls[0] if position_ls else []
-                status = {'text': k[2], 'type': 'status', 'value': '可能', 'position': position}
+                status = {'text': k[2], 'type': 'status', 'value': '可能',
+                          'position': position}
+                status_result.append(status)
+            elif k[1] in ['vn']:
+                flag = 3
+                position_ls = [x.span() for x in re.finditer(k[2], sen)]
+                position = position_ls[0] if position_ls else []
+                status = {'text': k[2], 'type': 'status', 'value': '正常',
+                          'position': position}
+                status_result.append(status)
+            elif k[1] in ['vab']:
+                flag = 4
+                position_ls = [x.span() for x in re.finditer(k[2], sen)]
+                position = position_ls[0] if position_ls else []
+                status = {'text': k[2], 'type': 'status', 'value': '未见异常',
+                          'position': position}
+                status_result.append(status)
+            elif k[1] in ['vsa']:
+                flag = 5
+                position_ls = [x.span() for x in re.finditer(k[2], sen)]
+                position = position_ls[0] if position_ls else []
+                status = {'text': k[2], 'type': 'status', 'value': '未见明显异常',
+                          'position': position}
                 status_result.append(status)
         return flag, status_result
 
