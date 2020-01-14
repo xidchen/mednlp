@@ -1,0 +1,39 @@
+# Git
+.gitignore
+
+# Byte-compiled
+__pycache__/
+
+# Logs
+logs/
+
+# Test
+test/
+
+# Config
+etc/cdss.cfg
+
+# Shell scripts
+bin/start.sh
+bin/start_bert.sh
+
+# Dictionaries
+data/dict/mmseg_kg/area.dic
+data/dict/mmseg_kg/body_part.dic
+data/dict/mmseg_kg/core.dic
+data/dict/mmseg_kg/disease.dic
+data/dict/mmseg_kg/doctor.dic
+data/dict/mmseg_kg/examination_item.dic
+data/dict/mmseg_kg/examination_result.dic
+data/dict/mmseg_kg/hospital.dic
+data/dict/mmseg_kg/hospital_brand.dic
+data/dict/mmseg_kg/hospital_department.dic
+data/dict/mmseg_kg/inspection_item.dic
+data/dict/mmseg_kg/medicine.dic
+data/dict/mmseg_kg/physical.dic
+data/dict/mmseg_kg/std_department.dic
+data/dict/mmseg_kg/symptom.dic
+data/dict/mmseg_kg/symptom_wy.dic
+data/dict/mmseg_kg/synonym.dic
+data/dict/mmseg_kg/treatment.dic
+data/dict/synonym/wy_symptom_name.dic
