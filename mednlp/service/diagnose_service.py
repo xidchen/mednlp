@@ -24,7 +24,7 @@ from mednlp.cdss.medical_record_backfill import BackFillTemplate
 from mednlp.dao.kg_dao import KGDao
 from mednlp.kg.clinical_guide_disease import ClinicalGuideDisease
 from mednlp.kg.inspection import Inspection
-from mednlp.model.utils import adjust_probability
+from mednlp.model.utils import adjust_probability, approx_probability
 from mednlp.service.base_request_handler import BaseRequestHandler
 from mednlp.text.neg_filter import filter_negative
 from mednlp.text.neg_filter import filter_physical_examination_negative
@@ -216,8 +216,6 @@ class DiagnoseService(BaseRequestHandler):
             print('diagnose range Error!', e)
             print(traceback.format_exc())
 
-        adjust_probability(disease_pop)
-
         # differential_diagnosis_disease = []
         # if collected_medical_record:
         #     try:
@@ -300,6 +298,9 @@ class DiagnoseService(BaseRequestHandler):
         # disease_dict, docs, _ = kg.find_disease(
         #     disease_dict, fl=fl_inner, rows=rows, start=start)
         # cc_times.append(time.time())
+
+        adjust_probability(disease_pop)
+        approx_probability(disease_pop)
 
         result = {'data': disease_pop}
         if api_code:

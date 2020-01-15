@@ -59,3 +59,17 @@ def adjust_probability(disease_pop):
     for disease in disease_pop:
         disease['score'] = math.sqrt(disease['score'])
     return disease_pop
+
+
+def approx_probability(disease_pop):
+    """
+    Give approximate probability so that the value is more like from a human
+    :param disease_pop: list
+    :return: disease_pop: list
+    """
+    import math
+    for disease in disease_pop:
+        pop_floor = math.floor(disease['score'] * 10) * 10
+        pop_ceil = math.ceil(disease['score'] * 10) * 10
+        disease['score'] = '{}%-{}%'.format(str(pop_floor), str(pop_ceil))
+    return disease_pop
