@@ -73,6 +73,7 @@ def trans_map():
 
 MERGE_MAP = trans_map()
 
+
 def merge_diagnose_range(all_diseases):
     if len(all_diseases) == 0:
         return all_diseases

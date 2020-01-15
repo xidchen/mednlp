@@ -228,8 +228,8 @@ def split_sen_add_char(sen, split_char):
             yield word
 
 
-def precoess_line(content, key_words=u'生活', insert_left=insert_dict[u'身体部位左侧'],
-                  insert_right=insert_dict[u'身体部位右侧']):
+def process_line(content, key_words=u'生活', insert_left=insert_dict[u'身体部位左侧'],
+                 insert_right=insert_dict[u'身体部位右侧']):
     """
     :param content: 原来的内容
     :param key_words: 需要插入的关键字
@@ -279,7 +279,7 @@ def get_char_body_part(mmseg, content):
     for k, v in entities.items():
         dict_result.append(k)
     for key in dict_result:
-        content = precoess_line(content, key_words=key)
+        content = process_line(content, key_words=key)
     result = get_split_result(content)
     return result
 

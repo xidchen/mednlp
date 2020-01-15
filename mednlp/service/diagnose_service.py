@@ -24,6 +24,7 @@ from mednlp.cdss.medical_record_backfill import BackFillTemplate
 from mednlp.dao.kg_dao import KGDao
 from mednlp.kg.clinical_guide_disease import ClinicalGuideDisease
 from mednlp.kg.inspection import Inspection
+from mednlp.model.utils import adjust_probability
 from mednlp.service.base_request_handler import BaseRequestHandler
 from mednlp.text.neg_filter import filter_negative
 from mednlp.text.neg_filter import filter_physical_examination_negative
@@ -214,6 +215,8 @@ class DiagnoseService(BaseRequestHandler):
         except Exception as e:
             print('diagnose range Error!', e)
             print(traceback.format_exc())
+
+        adjust_probability(disease_pop)
 
         # differential_diagnosis_disease = []
         # if collected_medical_record:
