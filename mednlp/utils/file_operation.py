@@ -132,6 +132,14 @@ def get_disease_symptom_filter():
     return dictionary
 
 
+def get_disease_symptom_enhancer():
+    f = codecs.open(global_conf.disease_symptom_enhancer_path)
+    dictionary = {}
+    for row in csv.reader(f):
+        dictionary[row[0]] = row[1].split('|')
+    return dictionary
+
+
 def get_symptom_name():
     f = codecs.open(global_conf.symptom_wy_dict_path)
     dictionary = {}

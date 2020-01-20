@@ -27,6 +27,7 @@ from mednlp.utils.file_operation import get_disease_inspection_filter
 from mednlp.utils.file_operation import get_disease_physical_exam_filter
 from mednlp.utils.file_operation import get_disease_past_medical_history_filter
 from mednlp.utils.file_operation import get_disease_symptom_filter
+from mednlp.utils.file_operation import get_disease_symptom_enhancer
 from mednlp.utils.file_operation import get_symptom_name
 from ailib.client.cloud_solr import CloudSolr
 from mednlp.dao.rule_service_dao import rule_condition_prefilter
@@ -64,6 +65,7 @@ class AidDiagnose(object):
         self.disease_physical_exam_filter = get_disease_physical_exam_filter()
         self.disease_past_medical_history_filter = get_disease_past_medical_history_filter()
         self.disease_symptom_filter = get_disease_symptom_filter()
+        self.disease_symptom_enhancer = get_disease_symptom_enhancer()
         self.body_part_name = []
         self.inspection_name = []
         self.physical_exam_name = []
@@ -73,6 +75,7 @@ class AidDiagnose(object):
         self.physical_exam_discount = 1
         self.past_medical_history_discount = 1
         self.symptom_discount = 0.999
+        self.symptom_premium = 1
         self.past_medical_history = ''
         config = configparser.ConfigParser()
         config.optionxform = str
@@ -147,6 +150,7 @@ class AidDiagnose(object):
             self.physical_exam_filter(disease_pop, patient_physical_examination)
             self.past_medical_history_filter(disease_pop)
             self.symptom_filter(disease_pop)
+            self.symptom_enhancer(disease_pop)
             self.strong_rule_filter(disease_pop, medical_record)
             normal_probability(disease_pop)
             disease_pop = sort(disease_pop)
@@ -313,6 +317,14 @@ class AidDiagnose(object):
                 for symptom in self.disease_symptom_filter[disease]:
                     if symptom in self.symptom_name:
                         disease_pop[disease] *= 1 - self.symptom_discount
+        return disease_pop
+
+    def symptom_enhancer(self, disease_pop):
+        for disease in disease_pop:
+            if self.disease_symptom_enhancer.get(disease):
+                for symptom in self.disease_symptom_enhancer[disease]:
+                    if symptom in self.symptom_name:
+                        disease_pop[disease] *= 1 + self.symptom_premium
         return disease_pop
 
     def diagnose_all(self, medical_record):

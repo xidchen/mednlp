@@ -69,7 +69,7 @@ def approx_probability(disease_pop):
     """
     import math
     for disease in disease_pop:
-        pop_floor = math.floor(disease['score'] * 10) * 10
-        pop_ceil = math.ceil(disease['score'] * 10) * 10
+        pop_floor = math.floor(disease['score'] * 20) * 5
+        pop_ceil = math.ceil(disease['score'] * 20) * 5
         disease['score'] = '{}%-{}%'.format(str(pop_floor), str(pop_ceil))
     return disease_pop
