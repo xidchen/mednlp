@@ -75,7 +75,7 @@ class AidDiagnose(object):
         self.physical_exam_discount = 1
         self.past_medical_history_discount = 1
         self.symptom_discount = 0.999
-        self.symptom_premium = 1
+        self.symptom_premium = 2
         self.past_medical_history = ''
         config = configparser.ConfigParser()
         config.optionxform = str
