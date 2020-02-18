@@ -12,8 +12,8 @@ import json
 import time
 import global_conf
 from ailib.utils.exception import ArgumentLostException
-from mednlp.service.base_request_handler import BaseRequestHandler
 from mednlp.model.disease_classify_lstm_model import DiseaseClassifyLSTM
+from mednlp.service.base_request_handler import BaseRequestHandler
 
 
 dcm = DiseaseClassifyLSTM(cfg_path=global_conf.cfg_path,

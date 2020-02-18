@@ -10,37 +10,30 @@ Create on 2018-04-02 Monday
 
 import global_conf
 from keras.models import model_from_json
-from mednlp.text.vector import Char2vector
+from keras.preprocessing.sequence import pad_sequences
 from ailib.model.base_model import BaseModel
 from mednlp.dao.data_loader import Key2Value
 from mednlp.dataset.padding import pad_sentences
 from mednlp.model.utils import normal_probability
-from keras.preprocessing.sequence import pad_sequences
+from mednlp.text.vector import Char2Vector
 from mednlp.text.vector import get_sex_to_vector, get_age_to_vector_for_lstm
 
 
 class DiseaseClassifyLSTM(BaseModel):
 
-    def initialize(self, **kwargs):
-        """
-        初始化模型,词典
-        """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.model_version = 144
+        self.model_name = 'disease_classify'
         self.model = self.load_model()
-        self.char2vector = Char2vector(global_conf.char_vocab_dict_path)
+        self.char2vector = Char2Vector(global_conf.char_vocab_dict_path)
         self.disease_dict = Key2Value(
             path=global_conf.disease_classify_dict_path, swap=True).load_dict()
 
     def load_model(self):
-        """
-        加载已经存在的模型,其中version为版本号
-        """
-        version = self.model_version
-        model_base_path = self.model_path + 'disease_classify'
-        model_path = model_base_path + '.' + '%s' + '.arch'
-        model_arch = model_path % version
-        model_weight_path = model_base_path + '.' + '%s' + '.weight'
-        model_weight = model_weight_path % version
+        model_base_path = self.model_path + self.model_name
+        model_arch = model_base_path + '.{}.arch'.format(self.model_version)
+        model_weight = model_base_path + '.{}.weight'.format(self.model_version)
         model = model_from_json(open(model_arch).read())
         model.load_weights(model_weight, by_name=True)
         return model

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-data_loader.py -- some data_loader
+data_loader.py -- some data loader
 
 Author: maogy <maogy@guahao.com>
-Create on 2017-05-27 星期六.
+Create on 2017-05-27 Saturday
 """
 
 from __future__ import print_function

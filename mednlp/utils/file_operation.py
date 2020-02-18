@@ -19,20 +19,24 @@ def get_disease_id():
     dictionary = {row[1]: row[0] for row in csv.reader(f)}
     return dictionary
 
+
 def get_disease_id_add():
     f = codecs.open(global_conf.disease_id_name_add_path)
     dictionary = {row[1]: row[0] for row in csv.reader(f)}
     return dictionary
+
 
 def get_disease_name():
     f = codecs.open(global_conf.disease_id_name_path)
     dictionary = {row[0]: row[1] for row in csv.reader(f)}
     return dictionary
 
+
 def get_disease_name_add():
     f = codecs.open(global_conf.disease_id_name_add_path)
     dictionary = {row[0]: row[1] for row in csv.reader(f)}
     return dictionary
+
 
 def get_disease_dept():
     f = codecs.open(global_conf.disease_name_dept_path)
@@ -164,6 +168,13 @@ def get_unit_name():
         row = row.strip().split('\t')
         dictionary[row[0]] = row[1]
     return dictionary
+
+
+def get_param_list(f):
+    param_list = []
+    for row in codecs.open(f):
+        param_list.append(row.strip())
+    return param_list
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ Author: maogy <maogy@guahao.com>
 Create on 2017-05-27 Saturday.
 """
 
+import os
 import csv
 import sys
 import math
@@ -21,10 +22,9 @@ from mednlp.dao.kg_dao import KGDao
 from mednlp.dataset.padding import pad_sentences
 from mednlp.text.mmseg import MMSeg
 from mednlp.text.neg_filter import filter_negative
-from mednlp.text.vector import Char2vector, Pinyin2vector, Word2vector
+from mednlp.text.vector import Char2Vector, Pinyin2Vector, Word2Vector
 from mednlp.text.vector import Dept2Vector, Label2Vector
 from mednlp.text.vector import get_sex_to_vector, get_age_to_vector_for_lstm
-import os
 
 
 def file_operation():
@@ -48,28 +48,36 @@ def file_operation():
 def disease_classify_vector(infile, outfile, n_limit=sys.maxsize):
     disease_dict = global_conf.disease_classify_dict_path
     data2vector(infile, outfile, n_limit,
-                Char2vector(global_conf.char_vocab_dict_path),
+                Char2Vector(global_conf.char_vocab_dict_path),
                 Label2Vector(disease_dict))
 
 
-def disease_classify_vector_sexandage(infile, outfile, n_limit=sys.maxsize):
+def disease_classify_vector_sex_and_age(infile, outfile, n_limit=sys.maxsize):
     disease_dict = global_conf.disease_classify_dict_path
-    data2vector_sexandage(infile, outfile, n_limit,
-                          Char2vector(global_conf.char_vocab_dict_path),
-                          Label2Vector(disease_dict))
+    data2vector_sex_and_age(infile, outfile, n_limit,
+                            Char2Vector(global_conf.char_vocab_dict_path),
+                            Label2Vector(disease_dict))
 
 
 def disease_classify_vector_history(infile, outfile, n_limit=sys.maxsize):
     disease_dict = global_conf.disease_classify_dict_path
     data2vector_history(infile, outfile, n_limit,
-                        Char2vector(global_conf.char_vocab_dict_path),
+                        Char2Vector(global_conf.char_vocab_dict_path),
                         Label2Vector(disease_dict))
 
 
 def disease_classify_vector_examination(infile, outfile, n_limit=sys.maxsize):
     disease_dict = global_conf.disease_classify_dict_path
     data2vector_examination(infile, outfile, n_limit,
-                            Char2vector(global_conf.char_vocab_dict_path),
+                            Char2Vector(global_conf.char_vocab_dict_path),
+                            Label2Vector(disease_dict))
+
+
+def disease_risk_classify_vector_health_exam(infile, outfile,
+                                             n_limit=sys.maxsize):
+    disease_dict = global_conf.disease_risk_dict_path
+    data2vector_health_exam(infile, outfile, n_limit,
+                            Char2Vector(global_conf.char_vocab_dict_path),
                             Label2Vector(disease_dict))
 
 
@@ -82,7 +90,7 @@ def train_data_char(infile, outfile, n_limit=sys.maxsize):
     """
     dept_dict = global_conf.dept_classify_dept_path
     data2vector_dept(infile, outfile, n_limit,
-                     Char2vector(global_conf.dept_classify_char_dict_path),
+                     Char2Vector(global_conf.dept_classify_char_dict_path),
                      Dept2Vector(dept_dict))
 
 
@@ -186,8 +194,8 @@ def data2vector(infile, outfile, n_limit=sys.maxsize,
     outfile.close()
 
 
-def data2vector_sexandage(infile, outfile, n_limit=sys.maxsize,
-                          x_vector=None, y_vector=None):
+def data2vector_sex_and_age(infile, outfile, n_limit=sys.maxsize,
+                            x_vector=None, y_vector=None):
     """
     把原始数据转化为词向量，考虑性别年龄
     :param infile: => 原始训练文件
@@ -371,6 +379,66 @@ def data2vector_examination(infile, outfile, n_limit=sys.maxsize,
     outfile.close()
 
 
+def data2vector_health_exam(infile, outfile, n_limit,
+                            x_vector=None, y_vector=None):
+    """
+    把原始数据转化为词向量
+    :param infile: 原始输入文件
+    :param outfile: 词向量输出文件
+    :param n_limit: 允许的最大输入文件长度
+    :param x_vector:
+    :param y_vector:
+    :return:
+    """
+    import csv
+    from mednlp.dataset.padding import pad_sentences
+    from mednlp.text.neg_filter import filter_negative
+    from mednlp.text.value_status_transformer import ValueStatusTransformer
+    from mednlp.text.vector import get_sex_to_vector, get_age_to_vector_for_lstm
+    vst = ValueStatusTransformer()
+    seq_len = 500
+    sep_len = 2
+    ins_len = 150 - sep_len
+    pe_len = 100 - sep_len
+    sex_and_age_len = 8
+    history_len = 50 - sex_and_age_len
+    kgd = KGDao()
+    db = DBWrapper(global_conf.cfg_path, 'mysql', 'AIMySQLDB')
+    label_alias = kgd.load_disease_alias(db)
+    outfile = codecs.open(outfile, 'w')
+    line_format = '%s %s\n'
+    f1 = codecs.open(infile)
+    for count, row in enumerate(csv.reader(f1)):
+        if count > n_limit:
+            break
+        diagnose, cc, mh, pmh = row[0], row[1], row[2], row[3]
+        pe, ins, sex, age = row[4], row[5], row[6], row[7]
+        label = label_alias[diagnose] if diagnose in label_alias else diagnose
+        if not y_vector.check_value(label):
+            continue
+        query = filter_negative(cc) + '..' + filter_negative(
+            mh) if cc or mh else ''
+        words = x_vector.get_vector(query)[:seq_len] if query else []
+        ins = filter_negative(ins) if ins else ''
+        ins = vst.base_transform(ins)
+        ins = x_vector.get_vector(ins)[:ins_len] if ins else []
+        pe = filter_negative(pe) if pe else ''
+        pe = vst.base_transform(pe)
+        pe = x_vector.get_vector(pe)[:pe_len] if pe else []
+        sex = get_sex_to_vector(sex) if sex else '0'
+        age = get_age_to_vector_for_lstm(age) if age else '0'
+        pmh = filter_negative(pmh) if pmh else ''
+        pmh = x_vector.get_vector(pmh) if pmh else []
+        pmh = pad_sentences([pmh], history_len, value='0',
+                            padding='post', truncating='post')[0]
+        sep = ['0'] * 2
+        words.extend(sep + ins + sep + pe)
+        words.extend(sep + [sex] + sep + [age] + sep + pmh)
+        line = line_format % (y_vector.get_vector(label), ','.join(words))
+        outfile.write(line)
+    outfile.close()
+
+
 def train_data_pinyin(infile, outfile, n_limit=sys.maxsize):
     """
     把原始数据转化为词向量
@@ -381,25 +449,25 @@ def train_data_pinyin(infile, outfile, n_limit=sys.maxsize):
     """
     dept_dict = global_conf.dept_classify_dept_path
     data2vector_dept(infile, outfile, n_limit,
-                     Pinyin2vector(),
+                     Pinyin2Vector(),
                      Dept2Vector(dept_dict))
 
 
 def train_data_cnn(infile, outfile, n_limit=sys.maxsize):
     """
-       把原始数据转化为词向量
-       :param infile: => 原始训练文件
-       :param outfile: =>  按照分词词典转化为词向量的文件
-       :param n_limit: 允许的最大文件长度
-       :return: 无返回值
-       """
+   把原始数据转化为词向量
+   :param infile: => 原始训练文件
+   :param outfile: =>  按照分词词典转化为词向量的文件
+   :param n_limit: 允许的最大文件长度
+   :return: 无返回值
+   """
     dept_dict = global_conf.dept_classify_dept_path
     data2vector_dept(infile, outfile, n_limit,
-                     Word2vector(global_conf.dept_classify_cnn_dict_path),
+                     Word2Vector(global_conf.dept_classify_cnn_dict_path),
                      Dept2Vector(dept_dict))
 
 
-def seg_traindata_backup(infile, outfile, seg_length=10):
+def seg_train_data_backup(infile, outfile, seg_length=10):
     """
     把词向量按照固定的长度拆分成多条
     :param infile: =>  转化为词向量的文件
@@ -431,7 +499,7 @@ def seg_traindata_backup(infile, outfile, seg_length=10):
     outfile.close()
 
 
-def seg_traindata(infile, outfile, cut_type='full', seg_length=10):
+def seg_train_data(infile, outfile, cut_type='full', seg_length=10):
     """
     把词向量按照固定的长度拆分成多条
     :param infile: => 转化为词向量的文件
@@ -467,7 +535,7 @@ def seg_traindata(infile, outfile, cut_type='full', seg_length=10):
     outfile.close()
 
 
-def seg_traindata_sex_age(infile, outfile, cut_type='full', seg_length=10):
+def seg_train_data_sex_age(infile, outfile, cut_type='full', seg_length=10):
     """
     把包含性别和年龄的词向量按照固定的长度拆分成多条
     :param infile: => 转化为词向量的文件
@@ -508,72 +576,37 @@ def seg_traindata_sex_age(infile, outfile, cut_type='full', seg_length=10):
 def get_char_data(file_path='medical_record_dept_train_union.txt', seg_length=100):
     input_file, train_vector_file, seg_file = generate_train_vector_file_path(file_path, train_type='char')
     train_data_char(input_file, train_vector_file)
-    seg_traindata(train_vector_file, seg_file,
-                  cut_type='cut', seg_length=seg_length)
+    seg_train_data(train_vector_file, seg_file,
+                   cut_type='cut', seg_length=seg_length)
     return seg_file
-
-
-# def get_char_data(seg_length=100):
-#     train_vector_file = train_data_path + 'medical_char_vector_record_dept_union.txt'
-#     input_file = train_data_path + 'medical_record_dept_train_union.txt'
-#     seg_file = train_data_path + 'medical_char_seg_record_dept_union.txt'
-#     train_data_char(input_file, train_vector_file)
-#     seg_traindata(train_vector_file, seg_file,
-#                   cut_type='cut', seg_length=seg_length)
-
-
-# def get_pinyin_data(seg_length=100):
-#     """
-#     把原始文件转化为词向量，分为转词向量和拆分成固定长度的向量两部分
-#     :param seg_length: 每句话拆分的词向量长度
-#     :return: 无返回值
-#     """
-#     train_vector_file = train_data_path + 'dept_classify_all_cnn_20180621_pinyin_vector.txt'
-#     input_file = train_data_path + 'dept_classify_all_cnn_20180621.txt'
-#     seg_file = train_data_path + 'dept_classify_all_cnn_20180621_pinyin_seg.txt'
-#     train_data_pinyin(input_file, outfile=train_vector_file)
-#     seg_traindata(train_vector_file, outfile=seg_file,
-#                   cut_type='cut', seg_length=seg_length)
 
 
 def get_pinyin_data(file_path='dept_classify_all_cnn_20180621.txt', seg_length=100):
     """
     把原始文件转化为词向量，分为转词向量和拆分成固定长度的向量两部分
+    :param file_path:
     :param seg_length: 每句话拆分的词向量长度
     :return: 无返回值
     """
     input_file, train_vector_file, seg_file = generate_train_vector_file_path(file_path, train_type='pinyin')
     train_data_pinyin(input_file, outfile=train_vector_file)
-    seg_traindata(train_vector_file, outfile=seg_file,
-                  cut_type='cut', seg_length=seg_length)
+    seg_train_data(train_vector_file, outfile=seg_file,
+                   cut_type='cut', seg_length=seg_length)
     return seg_file
 
 
 def get_cnn_data(file_path='dept_classify_all_cnn_20180621.txt', seg_length=200):
     """
     把原始文件转化为词向量，分为转词向量和拆分成固定长度的向量两部分
+    :param file_path:
     :param seg_length: 每句话拆分的词向量长度
     :return: 无返回值
     """
     input_file, train_vector_file, seg_file = generate_train_vector_file_path(file_path, train_type='cnn')
     train_data_cnn(input_file, outfile=train_vector_file)
-    seg_traindata(train_vector_file, outfile=seg_file,
-                  cut_type='cut', seg_length=seg_length)
+    seg_train_data(train_vector_file, outfile=seg_file,
+                   cut_type='cut', seg_length=seg_length)
     return seg_file
-
-
-# def get_cnn_data(seg_length=200):
-#     """
-#     把原始文件转化为词向量，分为转词向量和拆分成固定长度的向量两部分
-#     :param seg_length: 每句话拆分的词向量长度
-#     :return: 无返回值
-#     """
-#     train_vector_file = train_data_path + 'dept_classify_all_cnn_20180621_cnn_vector.txt'
-#     input_file = train_data_path + 'dept_classify_all_cnn_20180621.txt'
-#     seg_file = train_data_path + 'dept_classify_all_cnn_20180621_cnn_seg.txt'
-#     train_data_cnn(input_file, outfile=train_vector_file)
-#     seg_traindata(train_vector_file, outfile=seg_file,
-#                   cut_type='cut', seg_length=seg_length)
 
 
 def symptom_diagnose(n_limit=0):
@@ -754,10 +787,9 @@ def generate_train_vector_file_path(input_file_path, train_type='cnn'):
 
 def split_train_test_data(input_file_path, train_file_path, test_file_path, num=100000):
     """
-    :param input_file: 原本的训练数据集
-    :param train_file: 训练数据集
-    :param test_file: 测试数据集
-    :param sep: x和y分隔符
+    :param input_file_path: 原本的训练数据集
+    :param train_file_path: 训练数据集
+    :param test_file_path: 测试数据集
     :param num: 测试数据集的数目
     :return: 无
     """
@@ -783,9 +815,9 @@ def split_train_test_data(input_file_path, train_file_path, test_file_path, num=
 if __name__ == '__main__':
     command = '\n python %s [-t type -n number -c config_file]' % sys.argv[0]
     train_data_path = global_conf.train_data_path
-    train_vector_file = train_data_path + 'train_vector_char_true.txt'
-    input_file = train_data_path + 'traindata_dept_classify_true.txt'
-    seg_file = train_data_path + 'train_seg_data_char_true.txt'
+    train_vector_file_0 = train_data_path + 'train_vector_char_true.txt'
+    input_file_0 = train_data_path + 'traindata_dept_classify_true.txt'
+    seg_file_0 = train_data_path + 'train_seg_data_char_true.txt'
     parser = OptionParser(usage=command)
     parser.add_option('-t', '--type', dest='type', help='the type of operate')
     parser.add_option('-i', '--input', dest='input', help='the file input')
@@ -799,7 +831,7 @@ if __name__ == '__main__':
     parser.add_option('--tfinput', dest='tfinput', help='transform input file')
     parser.add_option('--tftype', dest='tftype', help='科室分诊采用何种方式处理')
     operate_type = 'all'
-    num = 100
+    num_0 = 100
     sa_mode = 0
     history_mode = 0
     exam_mode = 0
@@ -809,13 +841,13 @@ if __name__ == '__main__':
     if options.type:
         operate_type = options.type
     if options.input:
-        input_file = options.input
+        input_file_0 = options.input
     if options.vector_file:
-        train_vector_file = options.vector_file
+        train_vector_file_0 = options.vector_file
     if options.seg_file:
-        seg_file = options.seg_file
+        seg_file_0 = options.seg_file
     if options.seg_num:
-        num = int(options.seg_num)
+        num_0 = int(options.seg_num)
     if options.kg_size:
         size = int(options.kg_size)
         f = train_data_path + 'mr_generated.txt'
@@ -835,49 +867,49 @@ if __name__ == '__main__':
     if options.tfinput:
         origin_input_file = options.tfinput
         if tftype == 'char':
-            seg_file = get_char_data(origin_input_file, seg_length=100)
-            input_file_path, train_file_path, test_file_path = generate_train_file_path(seg_file)
-            split_train_test_data(input_file_path, train_file_path, test_file_path)
+            seg_file_0 = get_char_data(origin_input_file, seg_length=100)
+            input_file_path_0, train_file_path_0, test_file_path_0 = generate_train_file_path(seg_file_0)
+            split_train_test_data(input_file_path_0, train_file_path_0, test_file_path_0)
         elif tftype == 'cnn':
-            seg_file = get_cnn_data(origin_input_file, seg_length=200)
-            input_file_path, train_file_path, test_file_path = generate_train_file_path(seg_file)
-            split_train_test_data(input_file_path, train_file_path, test_file_path)
+            seg_file_0 = get_cnn_data(origin_input_file, seg_length=200)
+            input_file_path_0, train_file_path_0, test_file_path_0 = generate_train_file_path(seg_file_0)
+            split_train_test_data(input_file_path_0, train_file_path_0, test_file_path_0)
 
         elif tftype == 'pinyin':
-            seg_file = get_pinyin_data(origin_input_file, seg_length=100)
-            input_file_path, train_file_path, test_file_path = generate_train_file_path(seg_file)
-            split_train_test_data(input_file_path, train_file_path, test_file_path)
+            seg_file_0 = get_pinyin_data(origin_input_file, seg_length=100)
+            input_file_path_0, train_file_path_0, test_file_path_0 = generate_train_file_path(seg_file_0)
+            split_train_test_data(input_file_path_0, train_file_path_0, test_file_path_0)
         elif tftype == 'vector':
             get_char_data(origin_input_file, seg_length=100)
             get_cnn_data(origin_input_file, seg_length=200)
             get_pinyin_data(origin_input_file, seg_length=100)
         else:
-            seg_file = get_char_data(origin_input_file, seg_length=100)
-            input_file_path, train_file_path, test_file_path = generate_train_file_path(seg_file)
-            split_train_test_data(input_file_path, train_file_path, test_file_path)
-            seg_file = get_cnn_data(origin_input_file, seg_length=200)
-            input_file_path, train_file_path, test_file_path = generate_train_file_path(seg_file)
-            split_train_test_data(input_file_path, train_file_path, test_file_path)
-            seg_file = get_pinyin_data(origin_input_file, seg_length=100)
-            input_file_path, train_file_path, test_file_path = generate_train_file_path(seg_file)
-            split_train_test_data(input_file_path, train_file_path, test_file_path)
+            seg_file_0 = get_char_data(origin_input_file, seg_length=100)
+            input_file_path_0, train_file_path_0, test_file_path_0 = generate_train_file_path(seg_file_0)
+            split_train_test_data(input_file_path_0, train_file_path_0, test_file_path_0)
+            seg_file_0 = get_cnn_data(origin_input_file, seg_length=200)
+            input_file_path_0, train_file_path_0, test_file_path_0 = generate_train_file_path(seg_file_0)
+            split_train_test_data(input_file_path_0, train_file_path_0, test_file_path_0)
+            seg_file_0 = get_pinyin_data(origin_input_file, seg_length=100)
+            input_file_path_0, train_file_path_0, test_file_path_0 = generate_train_file_path(seg_file_0)
+            split_train_test_data(input_file_path_0, train_file_path_0, test_file_path_0)
     if options.input and options.vector_file:
         if sa_mode:
-            disease_classify_vector_sexandage(input_file, train_vector_file)
+            disease_classify_vector_sex_and_age(input_file_0, train_vector_file_0)
         if history_mode:
-            disease_classify_vector_history(input_file, train_vector_file)
+            disease_classify_vector_history(input_file_0, train_vector_file_0)
         if exam_mode:
-            disease_classify_vector_examination(input_file, train_vector_file)
+            disease_classify_vector_examination(input_file_0, train_vector_file_0)
         else:
-            disease_classify_vector(input_file, train_vector_file)
+            disease_classify_vector(input_file_0, train_vector_file_0)
 
     if options.input and options.seg_file:
         if options.type == 'train':
-            disease_classify_vector(input_file, train_vector_file)
+            disease_classify_vector(input_file_0, train_vector_file_0)
         elif options.type == 'seg':
-            seg_traindata(train_vector_file, seg_file,
-                          cut_type='cut', seg_length=num)
+            seg_train_data(train_vector_file_0, seg_file_0,
+                           cut_type='cut', seg_length=num_0)
         else:
-            disease_classify_vector(input_file, train_vector_file)
-            seg_traindata(train_vector_file, seg_file,
-                          cut_type='cut', seg_length=num)
+            disease_classify_vector(input_file_0, train_vector_file_0)
+            seg_train_data(train_vector_file_0, seg_file_0,
+                           cut_type='cut', seg_length=num_0)

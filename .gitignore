@@ -37,3 +37,6 @@ data/dict/mmseg_kg/symptom_wy.dic
 data/dict/mmseg_kg/synonym.dic
 data/dict/mmseg_kg/treatment.dic
 data/dict/synonym/wy_symptom_name.dic
+
+# Train data
+data/traindata/

@@ -74,7 +74,7 @@ def get_age_to_vector_for_lstm(age):
         return '0'
 
 
-class Char2vector(object):
+class Char2Vector(object):
     def __init__(self, dept_classify_dict_path=global_conf.dept_classify_char_dict_path):
         self.dept_classify_dict_path = dept_classify_dict_path
         self.medical_word = self.load_medical_dic()
@@ -432,7 +432,7 @@ class StandardAsk2Vector:
 
 def tet():
     line = '我身体不舒服头有点疼'
-    char2vector = Char2vector(
+    char2vector = Char2Vector(
         dept_classify_dict_path=global_conf.dept_classify_char_dict_path)
     vector3 = char2vector.get_char_vector(line)
     print(vector3)
